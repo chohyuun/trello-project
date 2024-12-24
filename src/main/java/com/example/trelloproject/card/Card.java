@@ -6,13 +6,14 @@ import com.example.trelloproject.member.Member;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.Setter;
+
 
 import java.util.Date;
 
 @Table(name = "card")
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Card extends BaseEntity {
@@ -49,6 +50,35 @@ public class Card extends BaseEntity {
         if (description != null) this.description = description;
         if (dueDate != null) this.dueDate = dueDate;
     }
+
+    public Card(Long id, String title, String description, Date dueDate, Member member, List list, CardFile cardFile) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.dueDate = dueDate;
+        this.member = member;
+        this.list = list;
+        this.cardFile = cardFile;
+    }
+
+    public Card(String title, String description, Date dueDate, Member member, List list, CardFile cardFile) {
+        this.title = title;
+        this.description = description;
+        this.dueDate = dueDate;
+        this.member = member;
+        this.list = list;
+        this.cardFile = cardFile;
+    }
+
+
+    public Card(String title, String description, Date dueDate) {
+        this.title = title;
+        this.description = description;
+        this.dueDate = dueDate;
+    }
+
+
+
 
 
 }

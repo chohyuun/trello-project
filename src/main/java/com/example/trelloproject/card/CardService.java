@@ -1,16 +1,17 @@
 package com.example.trelloproject.card;
 
 import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
-
 public class CardService {
 
     @Autowired
@@ -20,14 +21,15 @@ public class CardService {
     @Transactional
     public CardResponseDto createCard(CardRequestDto requestDto) {
 
-        Card card = Card.builder()
-                .title(requestDto.getTitle())
-                .description(requestDto.getDescription())
-                .dueDate(requestDto.getDueDate())
-                .member(requestDto.getMember())
-                .list(requestDto.getList())
-                .cardFile(requestDto.getCardFile())
-                .build();
+        Card card = new Card(
+                requestDto.getTitle(),
+                requestDto.getDescription(),
+                requestDto.getDueDate(),
+                requestDto.getMember(),
+                requestDto.getList(),
+                requestDto.getCardFile()
+        );
+
 
         Card saveCard = cardRepository.save(card);
         return new CardResponseDto(saveCard);
@@ -40,18 +42,25 @@ public class CardService {
         return new CardResponseDto(card);
     }
 
-    @Transactional(readOnly = true)
-    public java.util.List<CardResponseDto> getListAllCard(Long listId) {
-        List<Card> cards = cardRepository.findAllByListId(listId);
-        return cards.stream()
-                .map(CardResponseDto::new)
-                .collect(Collectors.toList());
+//    @Transactional(readOnly = true)
+//    public java.util.List<CardResponseDto> getListAllCard(Long listId) {
+//        List<Card> cards = cardRepository.findAllByListId(listId);
+//        return cards.stream()
+//                .map(CardResponseDto::new)
+//                .collect(Collectors.toList());
+//    }
 
+    @Transactional(readOnly = true)
+    public Page<CardResponseDto> getCardsByListId(Long listId, int page, int size, String sortBy) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        Page<Card> cardPage = cardRepository.findAllByListId(listId, pageable);
+        return cardPage.map(CardResponseDto::new);
     }
 
 
-    public CardResponseDto updateCard(Long cardId,Long listId, CardRequestDto requestDto){
-        Card card = cardRepository.findByListIdAndId(cardId,listId).orElseThrow(() -> new EntityNotFoundException("카드를 찾을 수 없습니다."));;
+    public CardResponseDto updateCard(Long cardId, Long listId, CardRequestDto requestDto) {
+        Card card = cardRepository.findByListIdAndId(cardId, listId).orElseThrow(() -> new EntityNotFoundException("카드를 찾을 수 없습니다."));
+        ;
 
         card.update(
                 requestDto.getTitle(),
@@ -61,11 +70,11 @@ public class CardService {
         return new CardResponseDto(card);
     }
 
-    public Boolean deleteCard(Long cardId){
+    public Boolean deleteCard(Long cardId) {
         if (cardRepository.existsById(cardId)) {
             cardRepository.deleteById(cardId);
             return true;
-        }else {
+        } else {
             return false;
         }
     }
