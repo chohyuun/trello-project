@@ -1,12 +1,12 @@
 package com.example.trelloproject.card;
 
+import com.example.trelloproject.card.dto.CardRequestDto;
+import com.example.trelloproject.card.dto.CardResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.data.domain.Page;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/lists/{listId}/cards")

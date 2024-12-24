@@ -1,5 +1,7 @@
 package com.example.trelloproject.card;
 
+import com.example.trelloproject.card.dto.CardRequestDto;
+import com.example.trelloproject.card.dto.CardResponseDto;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;

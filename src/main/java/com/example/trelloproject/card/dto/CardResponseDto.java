@@ -1,5 +1,7 @@
-package com.example.trelloproject.card;
+package com.example.trelloproject.card.dto;
 
+import com.example.trelloproject.card.Card;
+import com.example.trelloproject.card.CardFile;
 import com.example.trelloproject.list.List;
 import com.example.trelloproject.member.Member;
 import com.fasterxml.jackson.annotation.JsonFormat;
