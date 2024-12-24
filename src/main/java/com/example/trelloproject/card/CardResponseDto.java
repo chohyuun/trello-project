@@ -15,8 +15,10 @@ public class CardResponseDto {
     private Long id;
     private String title;
     private String description;
+
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date dueDate;
+
     private Member member;
     private List list;
     private CardFile cardFile;

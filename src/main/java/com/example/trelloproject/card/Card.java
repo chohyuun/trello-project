@@ -28,7 +28,7 @@ public class Card extends BaseEntity {
     @JoinColumn(name = "list_id")
     private List list;
 
-    @Column(name = "title" , nullable = false )
+    @Column(name = "title", nullable = false)
     private String title;
 
     @Column(name = "description")
@@ -44,8 +44,11 @@ public class Card extends BaseEntity {
     private CardFile cardFile;
 
 
-
-
+    public void update(String title, String description, Date dueDate) {
+        if (title != null) this.title = title;
+        if (description != null) this.description = description;
+        if (dueDate != null) this.dueDate = dueDate;
+    }
 
 
 }

@@ -17,6 +17,7 @@ public class CardRequestDto {
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date dueDate;
+
     private Member member;
     private List list;
     private CardFile cardFile;

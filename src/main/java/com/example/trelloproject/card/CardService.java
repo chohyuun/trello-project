@@ -48,4 +48,16 @@ public class CardService {
                 .collect(Collectors.toList());
 
     }
+
+
+    public CardResponseDto updateCard(Long cardId,Long listId, CardRequestDto requestDto){
+        Card card = cardRepository.findByListIdAndId(cardId,listId).orElseThrow(() -> new EntityNotFoundException("카드를 찾을 수 없습니다."));;
+
+        card.update(
+                requestDto.getTitle(),
+                requestDto.getDescription(),
+                requestDto.getDueDate()
+        );
+        return new CardResponseDto(card);
+    }
 }
