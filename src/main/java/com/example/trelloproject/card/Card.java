@@ -3,17 +3,18 @@ package com.example.trelloproject.card;
 import com.example.trelloproject.global.entity.BaseEntity;
 import com.example.trelloproject.list.List;
 import com.example.trelloproject.member.Member;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 
 @Table(name = "card")
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Card extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +36,13 @@ public class Card extends BaseEntity {
 
     @Column(name = "due_date")
     @Temporal(TemporalType.DATE)
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date dueDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "file")
+    private CardFile cardFile;
+
 
 
 
