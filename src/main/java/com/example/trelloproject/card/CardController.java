@@ -7,9 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-//@RequestMapping("/api/lists/{listId}/cards")
-//test 용
-@RequestMapping("/api/lists/1/cards")
+@RequestMapping("/api/lists/{listId}/cards")
 
 
 public class CardController {
@@ -51,10 +49,28 @@ public class CardController {
         return ResponseEntity.ok(cardService.getListAllCard(listId));
     }
 
+    /**
+     * 카드 수정
+     * @param cardId
+     * @param listId
+     * @param requestDto
+     * @return
+     */
     @PutMapping("/{cardId}")
     public ResponseEntity<CardResponseDto> updateCard(@PathVariable Long cardId, @PathVariable Long listId, @RequestBody CardRequestDto requestDto) {
 
         return ResponseEntity.ok(cardService.updateCard(cardId, listId, requestDto));
+    }
+
+    @DeleteMapping("/{cardId}")
+    public ResponseEntity<String> deleteCard(@PathVariable Long cardId){
+        boolean isDeleted = cardService.deleteCard(cardId);
+        if(isDeleted){
+            return ResponseEntity.ok("성공적으로 삭제 되었습니다.");
+        }else {
+            return ResponseEntity.notFound().build();
+        }
+
     }
 
 }

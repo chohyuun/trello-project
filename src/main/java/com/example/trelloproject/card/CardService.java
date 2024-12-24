@@ -60,4 +60,13 @@ public class CardService {
         );
         return new CardResponseDto(card);
     }
+
+    public Boolean deleteCard(Long cardId){
+        if (cardRepository.existsById(cardId)) {
+            cardRepository.deleteById(cardId);
+            return true;
+        }else {
+            return false;
+        }
+    }
 }
