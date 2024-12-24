@@ -1,6 +1,8 @@
 package com.example.trelloproject.card;
 
 import com.example.trelloproject.global.entity.BaseEntity;
+import com.example.trelloproject.list.List;
+import com.example.trelloproject.member.Member;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -19,11 +21,11 @@ public class Card extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    private Long memberId;
+    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "list_id")
-    private Long listId;
+    private List list;
 
     @Column(name = "title" , nullable = false )
     private String title;
