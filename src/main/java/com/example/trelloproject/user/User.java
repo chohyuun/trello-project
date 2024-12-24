@@ -1,6 +1,7 @@
 package com.example.trelloproject.user;
 
 import com.example.trelloproject.global.entity.BaseEntity;
+import com.example.trelloproject.user.enums.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -37,4 +38,15 @@ public class User extends BaseEntity {
 
 	@Column(nullable = false)
 	private boolean isDelete = false;
+
+	public User(String email, String password, String userName, UserRole role) {
+		this.email = email;
+		this.userName = userName;
+		this.password = password;
+		this.role = role;
+	}
+
+	public boolean getIsDelete(){
+		return isDelete;
+	}
 }
