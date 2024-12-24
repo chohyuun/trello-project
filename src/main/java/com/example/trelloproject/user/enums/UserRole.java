@@ -1,4 +1,4 @@
-package com.example.trelloproject.user;
+package com.example.trelloproject.user.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
