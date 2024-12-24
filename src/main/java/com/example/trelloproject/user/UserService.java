@@ -2,6 +2,8 @@ package com.example.trelloproject.user;
 
 import com.example.trelloproject.global.config.PasswordEncoder;
 import com.example.trelloproject.global.dto.MessageDto;
+import com.example.trelloproject.global.exception.BusinessException;
+import com.example.trelloproject.global.exception.ExceptionType;
 import com.example.trelloproject.user.enums.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,7 @@ public class UserService {
 	@Transactional
 	public MessageDto signUp(String email, String password, String userName, UserRole role) {
 		if (userRepository.existsByEmail(email)){
-			throw new RuntimeException("Email already exists");
+			throw new BusinessException(ExceptionType.EXIST_USER);
 		}
 
 		String encoded = passwordEncoder.encode(password);
