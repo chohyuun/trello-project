@@ -2,6 +2,7 @@ package com.example.trelloproject.card;
 
 import com.example.trelloproject.card.dto.CardRequestDto;
 import com.example.trelloproject.card.dto.CardResponseDto;
+import com.example.trelloproject.card.dto.CardSearchRequestDto;
 import com.example.trelloproject.global.exception.BusinessException;
 import com.example.trelloproject.global.exception.ExceptionType;
 import com.example.trelloproject.member.Member;
@@ -24,7 +25,7 @@ public class CardService {
 
     @Autowired
     private CardRepository cardRepository;
-//    @Autowired
+    //    @Autowired
 //    private MemberRepository  memberRepository;
     @Autowired
     private CardFileService cardFileService;
@@ -64,9 +65,8 @@ public class CardService {
         // 파일 이름 생성, 저장 경로 설정 등
         // 저장된 파일의 이름 또는 경로를 반환
 
-        return  "saveFile";
+        return "saveFile";
     }
-
 
 
     @Transactional(readOnly = true)
@@ -88,6 +88,54 @@ public class CardService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
         Page<Card> cardPage = cardRepository.findAllByListId(listId, pageable);
         return cardPage.map(CardResponseDto::new);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CardResponseDto> searchCards(CardSearchRequestDto searchDto, Pageable pageable) {
+        Page<Card> cards;
+
+        // 마감일 범위 검색
+        if (searchDto.getStartDate() != null && searchDto.getEndDate() != null) {
+            cards = cardRepository.findByDueDateBetween(
+                    searchDto.getStartDate(),
+                    searchDto.getEndDate(),
+                    pageable
+            );
+        }
+        // 보드 ID로 검색
+        else if (searchDto.getBoardId() != null) {
+            if (searchDto.getKeyword() != null && !searchDto.getKeyword().isEmpty()) {
+                cards = cardRepository.findByList_Board_IdAndTitleContainingOrDescriptionContaining(
+                        searchDto.getBoardId(),
+                        searchDto.getKeyword(),
+                        searchDto.getKeyword(),
+                        pageable
+                );
+            } else {
+                cards = cardRepository.findByList_Board_Id(searchDto.getBoardId(), pageable);
+            }
+        }
+        // 리스트 ID로 검색
+        else if (searchDto.getListId() != null) {
+            cards = cardRepository.findByListIdAndTitleContainingOrDescriptionContainingOrMember_User_UserNameContaining(
+                    searchDto.getListId(),
+                    searchDto.getKeyword(),
+                    searchDto.getKeyword(),
+                    searchDto.getKeyword(),
+                    pageable
+            );
+        }
+        // 전체 검색
+        else {
+            cards = cardRepository.findByTitleContainingOrDescriptionContainingOrMember_User_UserNameContaining(
+                    searchDto.getKeyword(),
+                    searchDto.getKeyword(),
+                    searchDto.getKeyword(),
+                    pageable
+            );
+        }
+
+        return cards.map(CardResponseDto::new);
     }
 
 
@@ -119,9 +167,6 @@ public class CardService {
 
         return new CardResponseDto(card);
     }
-
-
-
 
 
     public Boolean deleteCard(Long cardId) {

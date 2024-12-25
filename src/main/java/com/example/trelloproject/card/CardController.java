@@ -2,8 +2,11 @@ package com.example.trelloproject.card;
 
 import com.example.trelloproject.card.dto.CardRequestDto;
 import com.example.trelloproject.card.dto.CardResponseDto;
-import com.example.trelloproject.global.exception.BusinessException;
+import com.example.trelloproject.card.dto.CardSearchRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -84,6 +87,20 @@ public class CardController {
             return ResponseEntity.notFound().build();
         }
 
+    }
+
+    /**
+     * 카드 검색 API
+     *
+     * @param searchDto 검색 조건
+     * @param pageable 페이징 정보
+     * @return 검색된 카드 목록
+     */
+    @GetMapping("/search")
+    public ResponseEntity<Page<CardResponseDto>> searchCards(
+            @ModelAttribute CardSearchRequestDto searchDto,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(cardService.searchCards(searchDto, pageable));
     }
 
 }
