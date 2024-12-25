@@ -17,7 +17,7 @@ public interface CardRepository extends JpaRepository<Card, Long> {
     //리스트 카드 전체 조희
     Page<Card> findAllByListId(Long listId, Pageable pageable);
 
-    // User 테이블의 name으로 검색
+    // 기본 검색
     Page<Card> findByTitleContainingOrDescriptionContainingOrMember_User_UserNameContaining(
             String title,
             String description,
