@@ -18,9 +18,12 @@ public class CardFile extends BaseEntity {
     @JoinColumn(name = "card_id")
     private Card card;
 
-    @Column(name = "file")
+    @Column(name = "file", nullable = false)
     private String file;
 
-
+    public CardFile(Card card, String file) {
+        this.card = card;
+        this.file = file;
+    }
 
 }

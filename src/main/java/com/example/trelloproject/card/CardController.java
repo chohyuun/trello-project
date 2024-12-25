@@ -3,10 +3,12 @@ package com.example.trelloproject.card;
 import com.example.trelloproject.card.dto.CardRequestDto;
 import com.example.trelloproject.card.dto.CardResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/lists/{listId}/cards")
@@ -22,10 +24,11 @@ public class CardController {
      * @param requestDto
      * @return resposeDto
      */
-    @PostMapping
-    public CardResponseDto creatCard(@RequestBody CardRequestDto requestDto) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<CardResponseDto>  creatCard(@RequestPart("cardData") CardRequestDto requestDto,
+                                     @RequestPart(value = "file", required = false) MultipartFile file) {
 
-        return cardService.createCard(requestDto);
+        return ResponseEntity.ok(cardService.createCard(requestDto, file));
     }
 
     /**

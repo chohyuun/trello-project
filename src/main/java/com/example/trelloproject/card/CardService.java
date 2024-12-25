@@ -2,6 +2,7 @@ package com.example.trelloproject.card;
 
 import com.example.trelloproject.card.dto.CardRequestDto;
 import com.example.trelloproject.card.dto.CardResponseDto;
+import com.example.trelloproject.member.Member;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 
 @Service
@@ -18,24 +22,49 @@ public class CardService {
 
     @Autowired
     private CardRepository cardRepository;
-
+//    @Autowired
+//    private MemberRepository  memberRepository;
+    @Autowired
+    private CardFileService cardFileService;
 
     @Transactional
-    public CardResponseDto createCard(CardRequestDto requestDto) {
-
+    public CardResponseDto createCard(CardRequestDto requestDto, MultipartFile file) {
+        //맴버 조회
+//        Member member = memberRepository.findById(requestDto.getMemberId())
+//                .orElseThrow(() -> new EntityNotFoundException("멤버를 찾을 수 없습니다."));
         Card card = new Card(
                 requestDto.getTitle(),
                 requestDto.getDescription(),
                 requestDto.getDueDate(),
                 requestDto.getMember(),
+                //member, 나중에 변경
                 requestDto.getList(),
-                requestDto.getCardFile()
+                null //나중에 설정
         );
 
-
         Card saveCard = cardRepository.save(card);
+
+        if (file != null && !file.isEmpty()) {
+            try {
+                CardFile cardFile = cardFileService.saveFile(file, saveCard);
+                saveCard = saveCard.withCardFile(cardFile);
+                saveCard = cardRepository.save(saveCard);
+            } catch (IOException e) {
+                throw new RuntimeException("파일 저장 중 오류가 발생했습니다.", e);
+            }
+        }
+
         return new CardResponseDto(saveCard);
     }
+
+    private String saveFile(MultipartFile file) throws IOException {
+        // 파일 저장 로직 구현
+        // 파일 이름 생성, 저장 경로 설정 등
+        // 저장된 파일의 이름 또는 경로를 반환
+
+        return  "saveFile";
+    }
+
 
 
     @Transactional(readOnly = true)

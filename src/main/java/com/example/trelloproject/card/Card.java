@@ -45,6 +45,8 @@ public class Card extends BaseEntity {
     private CardFile cardFile;
 
 
+
+
     public void update(String title, String description, Date dueDate) {
         if (title != null) this.title = title;
         if (description != null) this.description = description;
@@ -75,6 +77,10 @@ public class Card extends BaseEntity {
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;
+    }
+
+    public Card withCardFile(CardFile cardFile) {
+        return new Card(this.id, this.title, this.description, this.dueDate, this.member, this.list, cardFile);
     }
 
 
