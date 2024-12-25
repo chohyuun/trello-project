@@ -6,6 +6,7 @@ import com.example.trelloproject.member.Member;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 
@@ -21,6 +22,6 @@ public class CardRequestDto {
 
     private Member member;
     private List list;
-    private CardFile cardFile;
+    private MultipartFile cardFile;
 
 }

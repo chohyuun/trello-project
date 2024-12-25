@@ -10,4 +10,6 @@ public interface CardFileRepository extends JpaRepository<CardFile,Long> {
     Optional<CardFile> findByCardId(Long cardId);
     // 카드 ID로 첨부파일 삭제
     void deleteByCardId(Long cardId);
+
+
 }

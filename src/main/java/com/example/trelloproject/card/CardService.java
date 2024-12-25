@@ -2,6 +2,8 @@ package com.example.trelloproject.card;
 
 import com.example.trelloproject.card.dto.CardRequestDto;
 import com.example.trelloproject.card.dto.CardResponseDto;
+import com.example.trelloproject.global.exception.BusinessException;
+import com.example.trelloproject.global.exception.ExceptionType;
 import com.example.trelloproject.member.Member;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -46,7 +48,7 @@ public class CardService {
 
         if (file != null && !file.isEmpty()) {
             try {
-                CardFile cardFile = cardFileService.saveFile(file, saveCard);
+                CardFile cardFile = cardFileService.uploadFile(file, saveCard);
                 saveCard = saveCard.withCardFile(cardFile);
                 saveCard = cardRepository.save(saveCard);
             } catch (IOException e) {
@@ -89,17 +91,38 @@ public class CardService {
     }
 
 
+    @Transactional
     public CardResponseDto updateCard(Long cardId, Long listId, CardRequestDto requestDto) {
-        Card card = cardRepository.findByListIdAndId(cardId, listId).orElseThrow(() -> new EntityNotFoundException("카드를 찾을 수 없습니다."));
-        ;
+        Card card = cardRepository.findByListIdAndId(cardId, listId)
+                .orElseThrow(() -> new EntityNotFoundException("카드를 찾을 수 없습니다."));
+
+        // 기존 파일이 있고 새 파일이 들어오면 기존 파일 삭제
+        if (card.getCardFile() != null && requestDto.getCardFile() != null) {
+            cardFileService.deleteCardFile(card.getCardFile().getId());
+        }
+
+        // 새 파일이 있으면 업로드
+        CardFile newFile = null;
+        if (requestDto.getCardFile() != null && !requestDto.getCardFile().isEmpty()) {
+            try {
+                newFile = cardFileService.uploadFile(requestDto.getCardFile(), card);
+            } catch (IOException e) {
+                throw new BusinessException(ExceptionType.FILE_UPLOAD_ERROR);
+            }
+        }
 
         card.update(
                 requestDto.getTitle(),
                 requestDto.getDescription(),
                 requestDto.getDueDate()
         );
+
         return new CardResponseDto(card);
     }
+
+
+
+
 
     public Boolean deleteCard(Long cardId) {
         if (cardRepository.existsById(cardId)) {

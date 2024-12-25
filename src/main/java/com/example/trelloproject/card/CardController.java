@@ -2,6 +2,7 @@ package com.example.trelloproject.card;
 
 import com.example.trelloproject.card.dto.CardRequestDto;
 import com.example.trelloproject.card.dto.CardResponseDto;
+import com.example.trelloproject.global.exception.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,13 +22,14 @@ public class CardController {
     /**
      * 카드 생성
      *
-     * @param requestDto
-     * @return resposeDto
+     * @param requestDto 카드 생성에 필요한 데이터 (제목, 설명, 마감일, 담당자 정보)
+     * @param file 첨부할 파일 (선택사항, 최대 5MB, 지원형식: jpg, png, pdf, csv)
+     * @return 생성된 카드의 정보
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<CardResponseDto>  creatCard(@RequestPart("cardData") CardRequestDto requestDto,
-                                     @RequestPart(value = "file", required = false) MultipartFile file) {
-
+    public ResponseEntity<CardResponseDto> createCard(
+            @RequestPart("cardData") CardRequestDto requestDto,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
         return ResponseEntity.ok(cardService.createCard(requestDto, file));
     }
 
