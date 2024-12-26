@@ -1,5 +1,6 @@
 package com.example.trelloproject.card.dto;
 
+import com.example.trelloproject.card.Card;
 import com.example.trelloproject.card.CardFile;
 import com.example.trelloproject.list.List;
 import com.example.trelloproject.member.Member;
@@ -24,4 +25,14 @@ public class CardRequestDto {
     private List list;
     private MultipartFile cardFile;
 
+
+    public CardRequestDto(Card card){
+        this.id = card.getId();
+        this.title = card.getTitle();
+        this.description = card.getDescription();
+        this.dueDate = card.getDueDate();
+        this.member = card.getMember();
+        this.list = card.getList();
+    }
 }
+
