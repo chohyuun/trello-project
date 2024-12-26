@@ -19,13 +19,12 @@ public class ListService {
 
     //리스트 생성
     public ListResponseDto createList(Long boardId, String title) {
-        //권한체킹 필요
 
         Board board = boardRepository.findByIdOrElseThrow(boardId);
 
         ListEntity list = new ListEntity(board, title);
         int maxIndex = listRepository.findMaxIndex();
-        list.setIndex(maxIndex + 1);
+        list.setIndex(maxIndex);
 
         ListEntity savedList = listRepository.save(list);
 
@@ -72,5 +71,10 @@ public class ListService {
         String message = "삭제 완료되었습니다.";
 
         return new MessageDto(message);
+    }
+
+    //접근 권함
+    public void accessList(Long listId) {
+
     }
 }
