@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.DynamicInsert;
+import org.springframework.stereotype.Service;
 
 @Entity
 @Getter
@@ -26,19 +27,20 @@ public class Member extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "varchar(20) default 'READONLY'")
     private MemberRole role;
 
     @Setter
-    @Column(nullable = false, columnDefinition = "boolean default false")
+    @Column(nullable = false)
     private boolean isActive;
 
     public Member() {}
 
-    public Member(Workspace workspace, User user, MemberRole role) {
+    public Member(Workspace workspace, User user, boolean isActive) {
         this.workspace = workspace;
         this.user = user;
-        this.role = role;
+        this.isActive = isActive;
     }
 }
