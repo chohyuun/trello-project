@@ -6,9 +6,9 @@ import com.example.trelloproject.member.Member;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.Setter;
 
 
+import java.util.ArrayList;
 import java.util.Date;
 
 @Table(name = "card")
@@ -43,9 +43,6 @@ public class Card extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "file")
     private CardFile cardFile;
-
-
-
 
     public void update(String title, String description, Date dueDate) {
         if (title != null) this.title = title;

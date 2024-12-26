@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "cardfile")
+@Table(name = "card_file")
 @NoArgsConstructor
 public class CardFile extends BaseEntity {
     @Id
@@ -17,6 +17,7 @@ public class CardFile extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "card_id")
     private Card card;
+
 
     @Column(name = "file", nullable = false)
     private String file;

@@ -3,6 +3,7 @@ package com.example.trelloproject.card;
 import com.example.trelloproject.card.dto.CardRequestDto;
 import com.example.trelloproject.card.dto.CardResponseDto;
 import com.example.trelloproject.card.dto.CardSearchRequestDto;
+import com.example.trelloproject.card.enums.ActionType;
 import com.example.trelloproject.global.exception.BusinessException;
 import com.example.trelloproject.global.exception.ExceptionType;
 import com.example.trelloproject.member.Member;
@@ -29,6 +30,8 @@ public class CardService {
 //    private MemberRepository  memberRepository;
     @Autowired
     private CardFileService cardFileService;
+    @Autowired
+    private CardHistoryRepository cardHistoryRepository;
 
     @Transactional
     public CardResponseDto createCard(CardRequestDto requestDto, MultipartFile file) {
@@ -158,12 +161,23 @@ public class CardService {
                 throw new BusinessException(ExceptionType.FILE_UPLOAD_ERROR);
             }
         }
-
+        // 카드 업데이트
         card.update(
                 requestDto.getTitle(),
                 requestDto.getDescription(),
                 requestDto.getDueDate()
         );
+
+        // 카드 변경 이력 저장
+        CardHistory history = new CardHistory(
+                card,
+                card.getTitle(),
+                card.getDescription(),
+                card.getDueDate(),
+                requestDto.getMember(),
+                ActionType.UPDATE
+        );
+        cardHistoryRepository.save(history);
 
         return new CardResponseDto(card);
     }

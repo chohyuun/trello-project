@@ -29,6 +29,7 @@ public class CardController {
      * @param file 첨부할 파일 (선택사항, 최대 5MB, 지원형식: jpg, png, pdf, csv)
      * @return 생성된 카드의 정보
      */
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CardResponseDto> createCard(
             @RequestPart("cardData") CardRequestDto requestDto,
