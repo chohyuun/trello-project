@@ -1,6 +1,5 @@
 package com.example.trelloproject.user;
 
-import com.example.trelloproject.global.constant.Const;
 import com.example.trelloproject.global.dto.MessageDto;
 import com.example.trelloproject.global.jwt.JwtUtil;
 import com.example.trelloproject.user.dto.DeleteUserDto;
@@ -8,14 +7,11 @@ import com.example.trelloproject.user.dto.JwtResponseDto;
 import com.example.trelloproject.user.dto.LoginRequestDto;
 import com.example.trelloproject.user.dto.SignupRequestDto;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
