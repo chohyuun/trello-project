@@ -3,6 +3,9 @@ package com.example.trelloproject.card;
 import com.example.trelloproject.card.dto.CardRequestDto;
 import com.example.trelloproject.card.dto.CardResponseDto;
 import com.example.trelloproject.card.dto.CardSearchRequestDto;
+import com.example.trelloproject.card.dto.GetCardResponseDto;
+import com.example.trelloproject.user.User;
+import com.example.trelloproject.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -10,6 +13,10 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.data.domain.Page;
@@ -22,6 +29,8 @@ import java.nio.file.AccessDeniedException;
 public class CardController {
     @Autowired
     private CardService cardService;
+    @Autowired
+    private UserRepository userRepository;
 
     /**
      * 카드 생성
@@ -36,9 +45,9 @@ public class CardController {
                                                       @RequestPart(value = "file", required = false) MultipartFile file,
                                                       @PathVariable Long listId,
                                                       @RequestAttribute Long userId,
-                                                      @RequestAttribute Long workspaceId)throws AccessDeniedException {
+                                                      @RequestAttribute Long workspaceId) throws AccessDeniedException {
 
-        CardResponseDto response = cardService.createCard(requestDto, file, userId, listId,workspaceId);
+        CardResponseDto response = cardService.createCard(requestDto, file, userId, listId, workspaceId);
         return ResponseEntity.ok(response);
     }
 
@@ -50,11 +59,16 @@ public class CardController {
      * @return
      */
     @GetMapping("/{cardId}")
-    public ResponseEntity<CardResponseDto> getcard(@PathVariable Long cardId,
-                                                   @PathVariable Long listId,
-                                                   @RequestAttribute Long userId) {
+    public ResponseEntity<GetCardResponseDto> getCard(@PathVariable Long cardId,
+                                                      @PathVariable Long listId) {
+        // SecurityContext에서 현재 인증된 사용자의 정보를 가져옴
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
         try {
-            CardResponseDto card = cardService.getCard(cardId, listId, userId);
+            GetCardResponseDto card = cardService.getCard(cardId, listId, user.getId());
             return ResponseEntity.ok(card);
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
@@ -68,12 +82,12 @@ public class CardController {
      * @return
      */
     @GetMapping
-    public ResponseEntity<Page<CardResponseDto>> getListAllCard(@PathVariable Long listId,
+    public ResponseEntity<Page<GetCardResponseDto>> getListAllCard(@PathVariable Long listId,
                                                                 @RequestParam(defaultValue = "0") int page,
                                                                 @RequestParam(defaultValue = "10") int size,
                                                                 @RequestParam(defaultValue = "id") String sortBy) {
 
-        Page<CardResponseDto> cards = cardService.getCardsByListId(listId, page, size, sortBy);
+        Page<GetCardResponseDto> cards = cardService.getCardsByListId(listId, page, size, sortBy);
 
         return ResponseEntity.ok(cards);
     }
@@ -91,7 +105,7 @@ public class CardController {
                                                       @RequestBody CardRequestDto requestDto,
                                                       @RequestAttribute Long userId,
                                                       @RequestAttribute Long listId,
-                                                      @RequestAttribute Long workspaceId)throws AccessDeniedException {
+                                                      @RequestAttribute Long workspaceId) throws AccessDeniedException {
         CardResponseDto response = cardService.updateCard(cardId, listId, requestDto, userId, workspaceId);
         return ResponseEntity.ok(response);
     }

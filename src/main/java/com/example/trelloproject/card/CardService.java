@@ -3,6 +3,7 @@ package com.example.trelloproject.card;
 import com.example.trelloproject.card.dto.CardRequestDto;
 import com.example.trelloproject.card.dto.CardResponseDto;
 import com.example.trelloproject.card.dto.CardSearchRequestDto;
+import com.example.trelloproject.card.dto.GetCardResponseDto;
 import com.example.trelloproject.card.enums.ActionType;
 import com.example.trelloproject.global.exception.BusinessException;
 import com.example.trelloproject.global.exception.ExceptionType;
@@ -10,6 +11,7 @@ import com.example.trelloproject.member.Member;
 import com.example.trelloproject.member.MemberRepository;
 import com.example.trelloproject.member.MemberRole;
 import com.example.trelloproject.member.MemberService;
+import com.example.trelloproject.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,8 @@ public class CardService {
     private CardHistoryRepository cardHistoryRepository;
     @Autowired
     private  MemberService memberService;
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     public CardService(MemberService memberService, CardRepository cardRepository) {
@@ -88,8 +92,9 @@ public class CardService {
 
 
     @Transactional(readOnly = true)
-    public CardResponseDto getCard(Long cardId, Long listId, Long userId) throws AccessDeniedException {
-        Card card = cardRepository.findByListIdAndId(cardId, listId).orElseThrow(() -> new EntityNotFoundException("카드가 존재하지 않습니다."));
+    public GetCardResponseDto getCard(Long cardId, Long listId, Long userId)throws AccessDeniedException {
+        Card card = cardRepository.findByListIdAndId(listId, cardId)
+                .orElseThrow(() -> new EntityNotFoundException("카드가 존재하지 않습니다."));
 
         Member member = memberRepository.findByUserIdAndWorkspaceId(userId, card.getList().getBoard().getWorkspace().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Member not found"));
@@ -98,7 +103,7 @@ public class CardService {
             throw new AccessDeniedException("카드 조회 권한이 없습니다.");
         }
 
-        return new CardResponseDto(card);
+        return new GetCardResponseDto(card);
     }
 
     private boolean hasReadPermission(Member member) {
@@ -106,19 +111,13 @@ public class CardService {
     }
 
 
-//    @Transactional(readOnly = true)
-//    public java.util.List<CardResponseDto> getListAllCard(Long listId) {
-//        List<Card> cards = cardRepository.findAllByListId(listId);
-//        return cards.stream()
-//                .map(CardResponseDto::new)
-//                .collect(Collectors.toList());
-//    }
+
 
     @Transactional(readOnly = true)
-    public Page<CardResponseDto> getCardsByListId(Long listId, int page, int size, String sortBy) {
+    public Page<GetCardResponseDto> getCardsByListId(Long listId, int page, int size, String sortBy) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
         Page<Card> cardPage = cardRepository.findAllByListId(listId, pageable);
-        return cardPage.map(CardResponseDto::new);
+        return cardPage.map(GetCardResponseDto::new);
     }
 
     @Transactional(readOnly = true)
