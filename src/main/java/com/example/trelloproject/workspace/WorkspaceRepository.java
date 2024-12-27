@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface WorkspaceRepository extends JpaRepository<Workspace, Long> {
 
-    @Query("SELECT DISTINCT m.workspace FROM Member m jOIN FETCH m.workspace w jOIN FETCH w.user WHERE m.user.id = :userId")
+    @Query("SELECT DISTINCT m.workspace FROM Member m WHERE m.user.id = :userId")
     List<Workspace> findWorkspacesByUserId(@Param("userId") Long userId);
 
     default Workspace findByIdOrElseThrow(Long workspaceId) {
