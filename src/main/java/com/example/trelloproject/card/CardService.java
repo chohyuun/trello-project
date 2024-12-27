@@ -7,6 +7,9 @@ import com.example.trelloproject.card.enums.ActionType;
 import com.example.trelloproject.global.exception.BusinessException;
 import com.example.trelloproject.global.exception.ExceptionType;
 import com.example.trelloproject.member.Member;
+import com.example.trelloproject.member.MemberRepository;
+import com.example.trelloproject.member.MemberRole;
+import com.example.trelloproject.member.MemberService;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 
 
 @Service
@@ -26,18 +30,29 @@ public class CardService {
 
     @Autowired
     private CardRepository cardRepository;
-    //    @Autowired
-//    private MemberRepository  memberRepository;
+    @Autowired
+    private MemberRepository memberRepository;
     @Autowired
     private CardFileService cardFileService;
     @Autowired
     private CardHistoryRepository cardHistoryRepository;
+    @Autowired
+    private  MemberService memberService;
+
+    @Autowired
+    public CardService(MemberService memberService, CardRepository cardRepository) {
+        this.memberService = memberService;
+        this.cardRepository = cardRepository;
+    }
+
 
     @Transactional
-    public CardResponseDto createCard(CardRequestDto requestDto, MultipartFile file) {
-        //맴버 조회
-//        Member member = memberRepository.findById(requestDto.getMemberId())
-//                .orElseThrow(() -> new EntityNotFoundException("멤버를 찾을 수 없습니다."));
+    public CardResponseDto createCard(CardRequestDto requestDto, MultipartFile file, long userId, Long workspaceId,Long listId) throws AccessDeniedException {
+
+        if (!memberService.hasCardEditPermission(userId, workspaceId)) {
+            throw new BusinessException(ExceptionType.UNAUTHORIZED);
+        }
+
         Card card = new Card(
                 requestDto.getTitle(),
                 requestDto.getDescription(),
@@ -73,10 +88,23 @@ public class CardService {
 
 
     @Transactional(readOnly = true)
-    public CardResponseDto getCard(Long cardId, Long listId) {
+    public CardResponseDto getCard(Long cardId, Long listId, Long userId) throws AccessDeniedException {
         Card card = cardRepository.findByListIdAndId(cardId, listId).orElseThrow(() -> new EntityNotFoundException("카드가 존재하지 않습니다."));
+
+        Member member = memberRepository.findByUserIdAndWorkspaceId(userId, card.getList().getBoard().getWorkspace().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Member not found"));
+
+        if (!hasReadPermission(member)) {
+            throw new AccessDeniedException("카드 조회 권한이 없습니다.");
+        }
+
         return new CardResponseDto(card);
     }
+
+    private boolean hasReadPermission(Member member) {
+        return member.getRole() != MemberRole.READONLY;
+    }
+
 
 //    @Transactional(readOnly = true)
 //    public java.util.List<CardResponseDto> getListAllCard(Long listId) {
@@ -143,8 +171,13 @@ public class CardService {
 
 
     @Transactional
-    public CardResponseDto updateCard(Long cardId, Long listId, CardRequestDto requestDto) {
-        Card card = cardRepository.findByListIdAndId(cardId, listId)
+    public CardResponseDto updateCard(Long cardId,Long listId, CardRequestDto requestDto, Long userId, Long workspaceId) throws AccessDeniedException {
+
+        if (!memberService.hasCardEditPermission(userId, workspaceId)) {
+            throw new BusinessException(ExceptionType.UNAUTHORIZED);
+        }
+
+        Card card = cardRepository.findByListIdAndId(listId, cardId)
                 .orElseThrow(() -> new EntityNotFoundException("카드를 찾을 수 없습니다."));
 
         // 기존 파일이 있고 새 파일이 들어오면 기존 파일 삭제
@@ -183,12 +216,17 @@ public class CardService {
     }
 
 
-    public Boolean deleteCard(Long cardId) {
-        if (cardRepository.existsById(cardId)) {
-            cardRepository.deleteById(cardId);
-            return true;
-        } else {
-            return false;
+    public Boolean deleteCard(Long cardId, CardRequestDto requestDto, Long userId, Long workspaceId) throws AccessDeniedException {
+
+        if (!memberService.hasCardEditPermission(userId, workspaceId)) {
+            throw new BusinessException(ExceptionType.UNAUTHORIZED);
         }
+
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new EntityNotFoundException("Card not found"));
+
+        cardRepository.delete(card);
+
+        return true;
     }
 }

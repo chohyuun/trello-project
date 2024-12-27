@@ -2,7 +2,7 @@ package com.example.trelloproject.card.dto;
 
 import com.example.trelloproject.card.Card;
 import com.example.trelloproject.card.CardFile;
-import com.example.trelloproject.list.List;
+import com.example.trelloproject.list.ListEntity;
 import com.example.trelloproject.member.Member;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
@@ -22,7 +22,7 @@ public class CardResponseDto {
     private Date dueDate;
 
     private Member member;
-    private List list;
+    private ListEntity list;
     private CardFile cardFile;
 
 

@@ -1,14 +1,12 @@
 package com.example.trelloproject.card;
 
 import com.example.trelloproject.global.entity.BaseEntity;
-import com.example.trelloproject.list.List;
+import com.example.trelloproject.list.ListEntity;
 import com.example.trelloproject.member.Member;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
-
-import java.util.ArrayList;
 import java.util.Date;
 
 @Table(name = "card")
@@ -27,7 +25,7 @@ public class Card extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "list_id")
-    private List list;
+    private ListEntity list;
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -50,7 +48,7 @@ public class Card extends BaseEntity {
         if (dueDate != null) this.dueDate = dueDate;
     }
 
-    public Card(Long id, String title, String description, Date dueDate, Member member, List list, CardFile cardFile) {
+    public Card(Long id, String title, String description, Date dueDate, Member member, ListEntity list, CardFile cardFile) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -60,7 +58,7 @@ public class Card extends BaseEntity {
         this.cardFile = cardFile;
     }
 
-    public Card(String title, String description, Date dueDate, Member member, List list, CardFile cardFile) {
+    public Card(String title, String description, Date dueDate, Member member, ListEntity list, CardFile cardFile) {
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;

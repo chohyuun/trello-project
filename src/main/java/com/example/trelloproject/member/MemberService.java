@@ -84,4 +84,11 @@ public class MemberService {
                         member.getRole().toString()))
                 .collect(Collectors.toList());
     }
+
+    //멤버 권한 확인(카드관련)
+    public boolean hasCardEditPermission(Long userId, Long workspaceId) {
+        Member member = memberRepository.findByUserIdAndWorkspaceId(userId, workspaceId)
+                .orElseThrow(() -> new BusinessException(ExceptionType.NOT_FIND_MEMBER));
+        return member.getRole() != MemberRole.READONLY;
+    }
 }
