@@ -44,6 +44,10 @@ dependencies {
     implementation "com.slack.api:bolt:1.44.2"
     implementation "com.slack.api:bolt-servlet:1.44.2"
     implementation "com.slack.api:bolt-jetty:1.44.2"
+
+    //S3
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+    implementation 'com.amazonaws:aws-java-sdk-s3'
 }
 
 tasks.named('test') {
