@@ -170,7 +170,7 @@ public class CardService {
 
 
     @Transactional
-    public CardResponseDto updateCard(Long cardId,Long listId, CardRequestDto requestDto, Long userId, Long workspaceId) throws AccessDeniedException {
+    public GetCardResponseDto updateCard(Long cardId,Long listId, MultipartFile file ,CardRequestDto requestDto, Long userId, Long workspaceId) throws AccessDeniedException {
 
         if (!memberService.hasCardEditPermission(userId, workspaceId)) {
             throw new BusinessException(ExceptionType.UNAUTHORIZED);
@@ -211,11 +211,11 @@ public class CardService {
         );
         cardHistoryRepository.save(history);
 
-        return new CardResponseDto(card);
+        return new GetCardResponseDto(card);
     }
 
 
-    public Boolean deleteCard(Long cardId, CardRequestDto requestDto, Long userId, Long workspaceId) throws AccessDeniedException {
+    public Boolean deleteCard(Long cardId, Long userId, Long workspaceId) throws AccessDeniedException {
 
         if (!memberService.hasCardEditPermission(userId, workspaceId)) {
             throw new BusinessException(ExceptionType.UNAUTHORIZED);

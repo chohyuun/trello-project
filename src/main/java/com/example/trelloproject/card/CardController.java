@@ -4,8 +4,11 @@ import com.example.trelloproject.card.dto.CardRequestDto;
 import com.example.trelloproject.card.dto.CardResponseDto;
 import com.example.trelloproject.card.dto.CardSearchRequestDto;
 import com.example.trelloproject.card.dto.GetCardResponseDto;
+import com.example.trelloproject.list.ListEntity;
+import com.example.trelloproject.list.ListRepository;
 import com.example.trelloproject.user.User;
 import com.example.trelloproject.user.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -31,6 +34,8 @@ public class CardController {
     private CardService cardService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ListRepository listRepository;
 
     /**
      * 카드 생성
@@ -43,11 +48,22 @@ public class CardController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CardResponseDto> createCard(@RequestPart("cardData") CardRequestDto requestDto,
                                                       @RequestPart(value = "file", required = false) MultipartFile file,
-                                                      @PathVariable Long listId,
-                                                      @RequestAttribute Long userId,
-                                                      @RequestAttribute Long workspaceId) throws AccessDeniedException {
+                                                      @PathVariable Long listId) throws AccessDeniedException {
 
-        CardResponseDto response = cardService.createCard(requestDto, file, userId, listId, workspaceId);
+        // SecurityContext에서 현재 인증된 사용자의 정보를 가져옵니다.
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        // listId를 통해 workspace 정보를 가져옵니다
+        ListEntity list = listRepository.findById(listId)
+                .orElseThrow(() -> new EntityNotFoundException("List not found"));
+        Long workspaceId = list.getBoard().getWorkspace().getId();
+
+
+
+        CardResponseDto response = cardService.createCard(requestDto, file, user.getId(), listId, workspaceId);
         return ResponseEntity.ok(response);
     }
 
@@ -83,9 +99,9 @@ public class CardController {
      */
     @GetMapping
     public ResponseEntity<Page<GetCardResponseDto>> getListAllCard(@PathVariable Long listId,
-                                                                @RequestParam(defaultValue = "0") int page,
-                                                                @RequestParam(defaultValue = "10") int size,
-                                                                @RequestParam(defaultValue = "id") String sortBy) {
+                                                                   @RequestParam(defaultValue = "0") int page,
+                                                                   @RequestParam(defaultValue = "10") int size,
+                                                                   @RequestParam(defaultValue = "id") String sortBy) {
 
         Page<GetCardResponseDto> cards = cardService.getCardsByListId(listId, page, size, sortBy);
 
@@ -100,24 +116,44 @@ public class CardController {
      * @param requestDto
      * @return
      */
-    @PutMapping("/{cardId}")
-    public ResponseEntity<CardResponseDto> updateCard(@PathVariable Long cardId,
-                                                      @RequestBody CardRequestDto requestDto,
-                                                      @RequestAttribute Long userId,
-                                                      @RequestAttribute Long listId,
-                                                      @RequestAttribute Long workspaceId) throws AccessDeniedException {
-        CardResponseDto response = cardService.updateCard(cardId, listId, requestDto, userId, workspaceId);
+    @PutMapping(value = "/{cardId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<GetCardResponseDto> updateCard(@PathVariable Long cardId,
+                                                      @RequestPart("cardData") CardRequestDto requestDto,
+                                                      @RequestPart(value = "file", required = false) MultipartFile file,
+                                                      @PathVariable Long listId) throws AccessDeniedException {
+
+        // SecurityContext에서 현재 인증된 사용자의 정보를 가져옵니다.
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        // listId를 통해 workspace 정보를 가져옵니다
+        ListEntity list = listRepository.findById(listId)
+                .orElseThrow(() -> new EntityNotFoundException("List not found"));
+        Long workspaceId = list.getBoard().getWorkspace().getId();
+
+        GetCardResponseDto response = cardService.updateCard(cardId, listId,file, requestDto, user.getId(),workspaceId);
         return ResponseEntity.ok(response);
     }
 
 
     @DeleteMapping("/{cardId}")
     public ResponseEntity<?> deleteCard(@PathVariable Long cardId,
-                                        @RequestBody CardRequestDto requestDto,
-                                        @RequestAttribute Long userId,
-                                        @RequestAttribute Long workspaceId) {
+                                        @PathVariable Long listId) {
+        // SecurityContext에서 현재 인증된 사용자의 정보를 가져옵니다.
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        // listId를 통해 workspace 정보를 가져옵니다
+        ListEntity list = listRepository.findById(listId)
+                .orElseThrow(() -> new EntityNotFoundException("List not found"));
+        Long workspaceId = list.getBoard().getWorkspace().getId();
+
         try {
-            cardService.deleteCard(cardId, requestDto, userId, workspaceId);
+            cardService.deleteCard(cardId, user.getId(), workspaceId);
             return ResponseEntity.ok("카드가 성공적으로 삭제되었습니다.");
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
