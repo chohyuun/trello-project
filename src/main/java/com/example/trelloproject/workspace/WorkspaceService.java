@@ -32,12 +32,12 @@ public class WorkspaceService {
      * @param userId   유저 id
      * @param title   워크스페이스 제목
      * @param description   워크스페이스 설명
+     * @return WorkspaceResponseDto
      */
 
     @Transactional
     public WorkspaceResponseDto createWorkspace(Long userId, String title, String description) {
         User user = userRepository.findByIdOrElseThrow(userId);
-
         if(!user.getRole().equals(UserRole.ADMIN)){
             throw new BusinessException(ExceptionType.NOT_ADMIN);
         }
@@ -60,6 +60,7 @@ public class WorkspaceService {
      * 워크스페이스 전체 조회
      *
      * @param userId   유저 id
+     * @return List<WorkspaceResponseDto>
      */
     public List<WorkspaceResponseDto> getWorkspaces(Long userId) {
         List<Workspace> workspaces = workspaceRepository.findWorkspacesByUserId(userId);
@@ -76,14 +77,12 @@ public class WorkspaceService {
     /**
      * 워크스페이스 단건 조회
      *
-     * @param userId   유저 id
      * @param workspaceId   워크스페이스 id
+     * @return SearchWorkspaceResponseDto
      */
-    public SearchWorkspaceResponseDto getWorkspace(Long userId, Long workspaceId) {
+    public SearchWorkspaceResponseDto getWorkspace(Long workspaceId) {
 
         Workspace workspace = workspaceRepository.findByIdOrElseThrow(workspaceId);
-        accessWorkspace(userId, workspace.getId());
-
 
         return new SearchWorkspaceResponseDto(workspace);
     }
@@ -92,17 +91,19 @@ public class WorkspaceService {
     /**
      * 워크스페이스 수정
      *
-     * @param userId   유저 id
+     * @param memberRole   멤버 권한
      * @param workspaceId   워크스페이스 id
      * @param title   워크스페이스 제목
      * @param description   워크스페이스 설명
+     * @return WorkspaceResponseDto
      */
     @Transactional
-    public WorkspaceResponseDto updateWorkspace(Long userId, Long workspaceId, String title, String description) {
+    public WorkspaceResponseDto updateWorkspace(MemberRole memberRole, Long workspaceId, String title, String description) {
+        if(memberRole.equals(MemberRole.READONLY)){
+            throw new BusinessException(ExceptionType.UNAUTHORIZED);
+        }
 
         Workspace workspace = workspaceRepository.findByIdOrElseThrow(workspaceId);
-        accessWorkspace(userId, workspace.getId());
-
         workspace.updateWorkspace(title, description);
 
         return new WorkspaceResponseDto(workspace.getId(), workspace.getUser().getId(), workspace.getTitle(), workspace.getDescription());
@@ -111,28 +112,20 @@ public class WorkspaceService {
     /**
      * 워크스페이스 삭제
      *
-     * @param userId   유저 id
+     * @param memberRole   멤버 권한
      * @param workspaceId   워크스페이스 id
+     * @return MessageDto
      */
-    public MessageDto deleteWorkspace(Long userId, Long workspaceId) {
+    @Transactional
+    public MessageDto deleteWorkspace(MemberRole memberRole, Long workspaceId) {
+        if(memberRole.equals(MemberRole.READONLY)){
+            throw new BusinessException(ExceptionType.UNAUTHORIZED);
+        }
 
         Workspace workspace = workspaceRepository.findByIdOrElseThrow(workspaceId);
-        accessWorkspace(userId, workspace.getId());
-
         workspaceRepository.delete(workspace);
 
         String message = "삭제 완료되었습니다.";
-
         return new MessageDto(message);
-    }
-
-    //접근 권한
-    public void accessWorkspace(Long userId, Long workspaceId) {
-        Member member = memberRepository.findByUserIdAndWorkspaceId(userId, workspaceId)
-                .orElseThrow(() -> new BusinessException(ExceptionType.UNAUTHORIZED));
-
-        if(!member.getRole().equals(MemberRole.ADMIN) && !member.getRole().equals(MemberRole.MEMBER)){
-            throw new BusinessException(ExceptionType.UNAUTHORIZED);
-        }
     }
 }

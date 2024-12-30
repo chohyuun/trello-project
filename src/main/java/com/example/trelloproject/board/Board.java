@@ -39,4 +39,8 @@ public class Board extends BaseEntity {
         this.workspace = workspace;
         this.title = title;
     }
+    public void updateBoard(String title, String file) {
+        this.title = title;
+        this.imagePath = file;
+    }
 }
