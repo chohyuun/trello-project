@@ -16,8 +16,9 @@ public enum ExceptionType {
 	NOT_FIND_BOARD(HttpStatus.NOT_FOUND, "보드를 찾을 수 없습니다."),
 	NOT_FIND_LIST(HttpStatus.NOT_FOUND, "리스트를 찾을 수 없습니다."),
 	EXIST_USER(HttpStatus.BAD_REQUEST,"이 email을 사용할 수 없습니다."),
-	USER_NOT_FOUNT(HttpStatus.BAD_REQUEST, "user를 찾을 수 없습니다."),
-	USER_DELETED(HttpStatus.BAD_REQUEST,"탈퇴된 user 입니다.");
+	USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "user를 찾을 수 없습니다."),
+	USER_DELETED(HttpStatus.BAD_REQUEST,"탈퇴된 user 입니다."),
+	PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST,"비밀번호가 일치하지 않습니다.");
 
 	private final HttpStatus status;
 	private final String errorMessage;

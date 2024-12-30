@@ -17,7 +17,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	default User findByEmailOrElseThrow(String email){
 		User user =  findByEmail(email).orElseThrow(
-			() -> new BusinessException(ExceptionType.USER_NOT_FOUNT)
+			() -> new BusinessException(ExceptionType.USER_NOT_FOUND)
 		);
 		if (user.getIsDelete()){
 			throw new BusinessException(ExceptionType.USER_DELETED);
@@ -27,7 +27,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	default User findByIdOrElseThrow(Long id){
 		User user = findById(id).orElseThrow(
-			() -> new BusinessException(ExceptionType.USER_NOT_FOUNT)
+			() -> new BusinessException(ExceptionType.USER_NOT_FOUND)
 		);
 		if (user.getIsDelete()){
 			throw new BusinessException(ExceptionType.USER_DELETED);
@@ -37,7 +37,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	default User findByUsernameOrElseThrow(String username){
 		User user = findByUserName(username).orElseThrow(
-			() -> new BusinessException(ExceptionType.USER_NOT_FOUNT)
+			() -> new BusinessException(ExceptionType.USER_NOT_FOUND)
 		);
 		if (user.getIsDelete()){
 			throw new BusinessException(ExceptionType.USER_DELETED);
