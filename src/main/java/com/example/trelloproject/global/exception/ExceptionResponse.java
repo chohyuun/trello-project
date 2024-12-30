@@ -1,6 +1,7 @@
 package com.example.trelloproject.global.exception;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Map;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -13,10 +14,13 @@ public class ExceptionResponse {
 	private int status;
 	private Timestamp timestamp;
 
+
 	public ExceptionResponse(HttpStatus error, String message, int status, Timestamp timestamp) {
 		this.error = error;
 		this.message = message;
 		this.status = status;
 		this.timestamp = timestamp;
 	}
+
+
 }
