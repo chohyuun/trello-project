@@ -5,11 +5,14 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.example.trelloproject.board.dto.BoardResponseDto;
 import com.example.trelloproject.board.dto.SearchBoardResponseDto;
 import com.example.trelloproject.global.dto.MessageDto;
-import com.example.trelloproject.user.User;
+import com.example.trelloproject.global.exception.BusinessException;
+import com.example.trelloproject.global.exception.ExceptionType;
+import com.example.trelloproject.member.MemberRole;
 import com.example.trelloproject.workspace.Workspace;
 import com.example.trelloproject.workspace.WorkspaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -24,10 +27,20 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final WorkspaceRepository workspaceRepository;
 
-    //TODO : 권한 및 예외처리, 이미지 저장 수정
-
-    //보드 생성
-    public BoardResponseDto createBoard(User user, Long workspaceId, String title, MultipartFile file) {
+    /**
+     * 보드 생성
+     *
+     * @param memberRole   멤버 권한
+     * @param workspaceId   워크스페이스 id
+     * @param title   보드 제목
+     * @param file   이미지 파일
+     * @return BoardResponseDto
+     */
+    @Transactional
+    public BoardResponseDto createBoard(MemberRole memberRole, Long workspaceId, String title, MultipartFile file) {
+        if(memberRole.equals(MemberRole.READONLY)) {
+            throw new BusinessException(ExceptionType.UNAUTHORIZED);
+        }
 
         Workspace workspace = workspaceRepository.findByIdOrElseThrow(workspaceId);
 
@@ -41,7 +54,12 @@ public class BoardService {
         return new BoardResponseDto(savedBoard.getId(), savedBoard.getWorkspace().getId(), savedBoard.getTitle(), savedBoard.getImagePath());
     }
 
-    //보드 단건 조회
+    /**
+     * 보드 단건 조회
+     *
+     * @param boardId   보드 id
+     * @return SearchBoardResponseDto
+     */
     public SearchBoardResponseDto getBoard(Long boardId){
 
         Board board = boardRepository.findByIdOrElseThrow(boardId);
@@ -49,20 +67,54 @@ public class BoardService {
         return new SearchBoardResponseDto(board);
     }
 
-    //보드 수정
-
-    //보드 삭제
-    public MessageDto deleteBoard(Long boardId){
+    /**
+     * 보드 수정
+     *
+     * @param memberRole   멤버 권한
+     * @param boardId   보드 id
+     * @param title   보드 제목
+     * @param file   이미지 파일
+     * @return BoardResponseDto
+     */
+    @Transactional
+    public BoardResponseDto updateBoard(MemberRole memberRole, Long boardId, String title, MultipartFile file) {
+        if(memberRole.equals(MemberRole.READONLY)) {
+            throw new BusinessException(ExceptionType.UNAUTHORIZED);
+        }
 
         Board board = boardRepository.findByIdOrElseThrow(boardId);
+        String fileUrl = uploadFileToS3(file);
+        board.updateBoard(title, fileUrl);
 
+        return new BoardResponseDto(board.getId(), board.getWorkspace().getId(), board.getTitle(), board.getImagePath());
+    }
+
+    /**
+     * 보드 삭제
+     *
+     * @param memberRole   멤버 권한
+     * @param boardId   보드 id
+     * @return MessageDto
+     */
+    @Transactional
+    public MessageDto deleteBoard(MemberRole memberRole, Long boardId){
+        if(memberRole.equals(MemberRole.READONLY)) {
+            throw new BusinessException(ExceptionType.UNAUTHORIZED);
+        }
+
+        Board board = boardRepository.findByIdOrElseThrow(boardId);
         boardRepository.delete(board);
 
         String message = "삭제 완료되었습니다.";
-
         return new MessageDto(message);
     }
 
+    /**
+     * 파일 업로드
+     *
+     * @param file   이미지 파일
+     * @return String(이미지 경로)
+     */
     private String uploadFileToS3(MultipartFile file){
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 

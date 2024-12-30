@@ -49,6 +49,7 @@ public class UserService {
 	}
 
 	public JwtResponseDto login(LoginRequestDto loginRequestDto) {
+		User user = userRepository.findByEmailOrElseThrow(loginRequestDto.getEmail());
 		logger.info("Login attempt for email: {}", loginRequestDto.getEmail());
 
 		// 사용자 인증 처리
@@ -57,7 +58,7 @@ public class UserService {
 		);
 
 		// 인증 성공 시 JWT 토큰 생성
-		String token = jwtUtil.generateToken(loginRequestDto.getEmail());
+		String token = jwtUtil.generateToken(user.getEmail(), user.getId());
 		logger.info("Generated JWT Token: {}", token);  // 생성된 JWT 토큰을 로그에 출력
 
 
