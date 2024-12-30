@@ -24,16 +24,18 @@ public enum ExceptionType {
     NOT_FIND_BOARD(HttpStatus.NOT_FOUND, "보드를 찾을 수 없습니다."),
     NOT_FIND_LIST(HttpStatus.NOT_FOUND, "리스트를 찾을 수 없습니다."),
     EXIST_USER(HttpStatus.BAD_REQUEST, "이 email을 사용할 수 없습니다."),
-    USER_NOT_FOUNT(HttpStatus.BAD_REQUEST, "user를 찾을 수 없습니다."),
+    USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "user를 찾을 수 없습니다."),
     USER_DELETED(HttpStatus.BAD_REQUEST, "탈퇴된 user 입니다."),
     NOT_CARD_TO_COMMENT(HttpStatus.NOT_FOUND, "해당 카드의 댓글이 아닙니다."),
-    READONLY(HttpStatus.FORBIDDEN, "읽기만 가능합 멤버입니다.");
+    READONLY(HttpStatus.FORBIDDEN, "읽기만 가능합 멤버입니다."),
+	PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST,"비밀번호가 일치하지 않습니다"),
+	INVALID_TOKEN(HttpStatus.UNAUTHORIZED,"토큰이 유효하지 않습니다.");
 
-    private final HttpStatus status;
-    private final String errorMessage;
+	private final HttpStatus status;
+	private final String errorMessage;
 
-    ExceptionType(HttpStatus status, String errorMessage) {
-        this.status = status;
-        this.errorMessage = errorMessage;
-    }
+	ExceptionType(HttpStatus status, String errorMessage) {
+		this.status = status;
+		this.errorMessage = errorMessage;
+	}
 }

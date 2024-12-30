@@ -40,7 +40,8 @@ public class SecurityConfig {
 		http
 			.csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/users/login", "/users/signup").permitAll() // 로그인, 회원가입은 인증 없이 접근 가능
+				.requestMatchers("/users/login", "/users/signup").permitAll()
+				.requestMatchers("/workspaces/create").hasRole("ADMIN")// 로그인, 회원가입은 인증 없이 접근 가능
 				.anyRequest().authenticated()) // 그 외 모든 요청은 인증 필요
 			.sessionManagement(session -> session
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT를 사용하므로 세션 비활성화

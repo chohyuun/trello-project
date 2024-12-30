@@ -27,12 +27,15 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final AuthenticationManager authenticationManager;
 	private final JwtUtil jwtUtil;
-	private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
 
-
-
-	//TODO : 글로벌 예외처리 작성시 예외처리 전체 수정
-
+	/**
+	 *
+	 * @param email 사용자 이메일
+	 * @param password 사용자 비밀번호
+	 * @param userName 사용자 이름
+	 * @param role 사용자 역할 (ADMIN,USER)
+	 * @return 완료시 "회원가입이 완료되었습니다" 문구 반환
+	 */
 	@Transactional
 	public MessageDto signUp(String email, String password, String userName, UserRole role) {
 		if (userRepository.existsByEmail(email)){
@@ -48,29 +51,37 @@ public class UserService {
 		return new MessageDto("회원가입이 완료되었습니다.");
 	}
 
+	/**
+	 *
+	 * @param loginRequestDto 로그인 dto > email, password
+	 * @return jwt 토큰 반환
+	 */
 	public JwtResponseDto login(LoginRequestDto loginRequestDto) {
-		User user = userRepository.findByEmailOrElseThrow(loginRequestDto.getEmail());
-		logger.info("Login attempt for email: {}", loginRequestDto.getEmail());
-
 		// 사용자 인증 처리
 		Authentication authentication = authenticationManager.authenticate(
 			new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword())
 		);
 
-		// 인증 성공 시 JWT 토큰 생성
-		String token = jwtUtil.generateToken(user.getEmail(), user.getId());
-		logger.info("Generated JWT Token: {}", token);  // 생성된 JWT 토큰을 로그에 출력
+		User user = userRepository.findByEmailOrElseThrow(loginRequestDto.getEmail());
 
+		// 인증 성공 시 JWT 토큰 생성
+		String token = jwtUtil.generateToken(loginRequestDto.getEmail(),user.getId(),user.getRole().toString());
 
 		// JwtResponseDto에 JWT 토큰을 담아서 반환
 		return new JwtResponseDto(token);
 	}
 
+	/**
+	 *
+	 * @param email 사용자 메일
+	 * @param password 사용자 비밀번호
+	 * @return 완료시 "회원 탈퇴가 완료되었습니다" 반환
+	 */
 	@Transactional
 	public MessageDto deleteUser(String email, String password) {
 		User user = userRepository.findByEmailOrElseThrow(email);
 		if (!passwordEncoder.matches(password, user.getPassword())){
-			throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+			throw new BusinessException(ExceptionType.PASSWORD_NOT_MATCH);
 		}
 		userRepository.delete(user);
 

@@ -6,7 +6,6 @@ import com.example.trelloproject.user.dto.DeleteUserDto;
 import com.example.trelloproject.user.dto.JwtResponseDto;
 import com.example.trelloproject.user.dto.LoginRequestDto;
 import com.example.trelloproject.user.dto.SignupRequestDto;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,6 +27,11 @@ public class UserController {
 	private final JwtUtil jwtUtil;
 	private AuthenticationManager authenticationManager;
 
+	/**
+	 *
+	 * @param signupRequestDto 회원가입 dto > email, password, name, role (email과 password에 검증)
+	 * @return 회원가입 완료 메세지 반환
+	 */
 	@PostMapping("/signup")
 	public ResponseEntity<MessageDto> signUp(
 		@Valid @RequestBody SignupRequestDto signupRequestDto
@@ -39,39 +43,36 @@ public class UserController {
 		return new ResponseEntity<>(messageDto, HttpStatus.CREATED);
 	}
 
-//	@PostMapping("/login")
-//	public ResponseEntity<MessageDto> login(@Valid @RequestBody LoginRequestDto loginRequestDto,
-//		HttpServletRequest request){
-//		User user = userService.login(
-//			loginRequestDto.getEmail(), loginRequestDto.getPassword()
-//		);
-//
-//		HttpSession session = request.getSession(true);
-//
-//		if (session.getAttribute(Const.LOGIN_USER) != null) {
-//			return new ResponseEntity<>(new MessageDto("이미 로그인 되어있는 사용자 입니다."), HttpStatus.CONFLICT);
-//		}
-//
-//		session.setAttribute(Const.LOGIN_USER, user);
-//		MessageDto message = new MessageDto("로그인이 완료되었습니다.");
-//
-//		return new ResponseEntity<>(message, HttpStatus.OK);
-//	}
-
+	/**
+	 *
+	 * @param loginRequestDto 로그인 dto > email, password
+	 * @return 로그인 완료 메세지 반환
+	 */
 	@PostMapping("/login")
 	public ResponseEntity<JwtResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
 		JwtResponseDto jwtResponseDto = userService.login(loginRequestDto);
 		return new ResponseEntity<>(jwtResponseDto, HttpStatus.OK);
 	}
 
+	/**
+	 * jwt 토큰의 삭제는 클라이언트 단에서 시행되는 로직이기 때문에,
+	 * 현재 로그아웃은 컨트롤러 에서만 형식적으로 존재합니다.
+	 * @return 로그아웃 완료 메세지 반환
+	 */
 	@PostMapping("/logout")
-	public ResponseEntity<MessageDto> logout(HttpServletRequest request){
+	public ResponseEntity<MessageDto> logout(){
 		//토큰 삭제는 클라이언트측에서 구현
 		MessageDto message = new MessageDto("로그아웃이 완료되었습니다.");
 
 		return new ResponseEntity<>(message, HttpStatus.OK);
 	}
 
+	/**
+	 *
+	 * @param deleteUserDto 회원 삭제 dto > password
+	 * @param authorizationHeader jwt 토큰 추출
+	 * @return 삭제 완료 메세지 반환
+	 */
 	@DeleteMapping
 	public ResponseEntity<MessageDto> deleteUser(@RequestBody DeleteUserDto deleteUserDto,@RequestHeader("Authorization") String authorizationHeader){
 		// Bearer 키워드 제거
