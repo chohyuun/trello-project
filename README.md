@@ -11,19 +11,14 @@
 #### 칸반 보드 형식의 트렐로를 백엔드로 구현하는 프로젝트
 
 ## 🍨 Team 2게더
-|                    Backend                     |               Backend               |
-|:----------------------------------------------:|:-----------------------------------:|
-|                     ![](https://cdn-static.zep.us/static/assets/baked-avartar-images/8-56-26-332.png)                      |                ![]()                |
-|      [조현지](https://github.com/yewon-Noh)       | [양제훈](https://github.com/SeongHo-C) |
-| ![](https://cdn-static.zep.us/static/assets/baked-avartar-images/2-279-20-325.png) |                ![](https://cdn-static.zep.us/static/assets/baked-avartar-images/10-72-41-563.png)                |
-|      [박예진](https://github.com/yewon-Noh)       | [한승완](https://github.com/SeongHo-C) |
-
-## 🗂️ APIs
-작성한 API는 아래에서 확인할 수 있습니다.
-
-👉🏻 [API 바로보기](https://teamsparta.notion.site/2-1582dc3ef51481ee80ead2738eea31f3)
-
-
+|                                      Backend                                       |                                      Backend                                       |
+|:----------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------:|
+| ![](https://cdn-static.zep.us/static/assets/baked-avartar-images/8-56-26-332.png)  | ![](https://cdn-static.zep.us/static/assets/baked-avartar-images/10-58-53-336.png) |
+|                        [조현지](https://github.com/yewon-Noh)                         |                        [양제훈](https://github.com/SeongHo-C)                         |
+|                             댓글 & 알림    (slack sdk 사용)                              |                                   카드, 카드 검색 최적화                                    |
+| ![](https://cdn-static.zep.us/static/assets/baked-avartar-images/2-279-20-325.png) | ![](https://cdn-static.zep.us/static/assets/baked-avartar-images/10-72-41-563.png) |
+|                        [박예진](https://github.com/yewon-Noh)                         |                        [한승완](https://github.com/SeongHo-C)                         |
+|                             유저 & 로그인 (spring security)                             |                                 워크 스페이스 & 보드 & 리스트                                 |
 <br />
 
 ## ⚙ 기술 스택
@@ -58,21 +53,132 @@
 
 <br />
 
+## 프로젝트 구조
+
+```plaintext
+📦 trello-project
+├── 📂 src
+│   ├── 📂 main
+│   │   ├── 📂 java
+│   │   │   ├── 📂 board
+│   │   │   ├── 📂 card
+│   │   │   ├── 📂 comment
+│   │   │   ├── 📂 global    # 공통 코드 (ex. config, filter)
+│   │   │   ├── 📂 list
+│   │   │   ├── 📂 member
+│   │   │   ├── 📂 notice
+│   │   │   ├── 📂 user
+│   │   │   └── 📂 workspace
+│   └── 📂 test
+├── 📄 .gitignore
+├── 📄 Dockerfile
+└── 📄 README.md
+```
+
 ## 🛠️ 프로젝트 아키텍쳐
-![Figma link](https://www.figma.com/design/yojLnL4papWqljeFPi95jT/Untitled?node-id=0-1&p=f&t=9IDTIuDPH6PniPQ9-0&node-type=canvas)
+<details>
+<summary>와이어 프레임</summary>
 
+<img src="https://github.com/user-attachments/assets/6d3bd3ce-87de-4de2-8999-7281e7dc2921">
 
+👉🏻 [와이어 프레임 바로보기](https://www.figma.com/design/yojLnL4papWqljeFPi95jT/Untitled?node-id=0-1&t=RZNg2zPztvl5EarL-1)
+</details>
+
+<details>
+<summary>ERD</summary>
+<img src="https://github.com/user-attachments/assets/b21cafae-b9f2-40e3-ba01-786651657840">
+
+👉🏻 [ERD 바로보기](https://www.erdcloud.com/d/z8s3jowhc7E8ALxH7)
+
+</details>
 
 <br />
 
-## 🤔 기술적 이슈와 해결 과정
-- Stream 써야할까?
-    - [Stream API에 대하여](https://velog.io/@yewo2nn16/Java-Stream-API)
-- Gmail STMP 이용하여 이메일 전송하기
-    - [gmail 보내기](https://velog.io/@yewo2nn16/Email-이메일-전송하기with-첨부파일)
-- AWS EC2에 배포하기
-    - [서버 배포하기-1](https://velog.io/@yewo2nn16/SpringBoot-서버-배포)
-    - [서버 배포하기-2](https://velog.io/@yewo2nn16/SpringBoot-서버-배포-인텔리제이에서-jar-파일-빌드해서-배포하기)
+## 🪧 커밋 컨벤션
+| 작업 타입| 작업 내용|
+|------|-|
+|✨ update|해당 파일에 새로운 기능이 생김|
+|🎉 feat|없던 파일을 생성함, 초기 세팅|
+|🐛 bugfix|버그 수정|
+|♻️ refactor|코드 리팩토링|
+|🩹 fix|코드 수정|
+|🚚 move|파일 옮김/정리|
+|🔥 del|기능/파일을 삭제|
+|🍻 test|테스트 코드를 작성|
+|🙈 gitfix|gitignore 수정|
+|🔨script|package.json 변경(npm 설치 등)|
+|📝 docs|문서 추가
+
+## 👔 코드 컨벤션
+<details>
+<summary>코드 컨벤션 펼치기</summary>
+
+- 주석
+  - java doc 사용
+
+- 클래스 명
+  - PascalCase 사용 (ex : UserAccount)
+
+- 변수 명
+  - camelCase 사용 (ex : firstName)
+
+- 패키지 구조 : 도메인 형
+  - 도메인 밑에 패키지 없이 작성
+  - Dto만 분리
+
+- 생성자 → 생성자 패턴
+
+- lombok Setter 사용 금지
+
+- service interface 없이 class 로 바로 생성
+</details>
+
+## 🗂️ APIs
+작성한 API는 아래에서 확인할 수 있습니다.
+
+👉🏻 [API 바로보기](https://teamsparta.notion.site/2-1582dc3ef51481ee80ead2738eea31f3)
+
+## 🔧구현 기능
+<details>
+<summary>구현 기능 펼치</summary>
+### 🧑‍🧑‍🧒 user
+
+- 회원가입 & 회원 탈퇴
+- 로그인 & 로그아웃
+
+### 🪜 워크 스페이스
+
+- 워크 스페이스 생성 & 수정 & 삭제
+- 워크 스페이스 전체 조회 & 단건 조회
+- 워크 스페이스 멤버 초대 & 초대 수락
+- 워크 스페이스 멤버 목록 조회
+- 워크 스페이스 유저 권한 수정
+
+### 🎬 보드 
+
+- 보드 생성 & 수정 & 삭제
+- 보드 단건 조회
+
+### ✅ 리스트
+
+- 리스트 생성 & 수정 & 삭제
+- 리스트 순서 변경
+
+### 📇 카드
+
+- 카드 생성 & 수정 & 삭제
+- 카드 단건 조회
+- 카드 다건 조회 (검색)
+
+### 💬 댓글
+
+- 댓글 생성 & 수정 & 삭제
+- 댓글 전체 조회
+
+### ⏰ 알림
+
+- 특정 동작 수행시 슬랙으로 알림 발송
+- </details>
 
 
 <br />
