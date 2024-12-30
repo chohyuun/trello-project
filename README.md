@@ -14,10 +14,10 @@
 |                                      Backend                                       |                                      Backend                                       |
 |:----------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------:|
 | ![](https://cdn-static.zep.us/static/assets/baked-avartar-images/8-56-26-332.png)  | ![](https://cdn-static.zep.us/static/assets/baked-avartar-images/10-58-53-336.png) |
-|                        [조현지](https://github.com/yewon-Noh)                         |                        [양제훈](https://github.com/SeongHo-C)                         |
+|                        [조현지](https://github.com/chohyuun)                         |                        [양제훈](https://github.com/89JHoon)                         |
 |                             댓글 & 알림    (slack sdk 사용)                              |                                   카드, 카드 검색 최적화                                    |
 | ![](https://cdn-static.zep.us/static/assets/baked-avartar-images/2-279-20-325.png) | ![](https://cdn-static.zep.us/static/assets/baked-avartar-images/10-72-41-563.png) |
-|                        [박예진](https://github.com/yewon-Noh)                         |                        [한승완](https://github.com/SeongHo-C)                         |
+|                        [박예진](https://github.com/hamuck)                         |                        [한승완](https://github.com/Dawnfeeling)                         |
 |                             유저 & 로그인 (spring security)                             |                                 워크 스페이스 & 보드 & 리스트                                 |
 <br />
 
