@@ -24,57 +24,75 @@ public class MemberService {
     private final WorkspaceRepository workspaceRepository;
     private final UserRepository userRepository;
 
-    //멤버 초대
-    public MessageDto inviteMember(Long userId, Long workspaceId, String email) {
-
-        Workspace workspace = workspaceRepository.findByIdOrElseThrow(workspaceId);
-        User inviteUser = userRepository.findByIdOrElseThrow(userId);
-        User user = userRepository.findByEmailOrElseThrow(email);
-        Member member = memberRepository.findByIdOrElseThrow(inviteUser.getId());
-
-        if(!member.getId().equals(inviteUser.getId())) {
-            throw new BusinessException(ExceptionType.NOT_MEMBER);
+    /**
+     * 멤버 초대
+     *
+     * @param memberRole   멤버 권한
+     * @param workspaceId   워크스페이스 id
+     * @param email   초대 유저 email
+     * @return MessageDto
+     */
+    @Transactional
+    public MessageDto inviteMember(MemberRole memberRole, Long workspaceId, String email) {
+        if(memberRole == MemberRole.READONLY) {
+            throw new BusinessException(ExceptionType.UNAUTHORIZED);
         }
 
+        Workspace workspace = workspaceRepository.findByIdOrElseThrow(workspaceId);
+        User user = userRepository.findByEmailOrElseThrow(email);
         Member invitemember = new Member(workspace, user, false);
+
         memberRepository.save(invitemember);
 
         String message = "초대 완료되었습니다.";
-
         return new MessageDto(message);
     }
 
-    //멤버 수락
+    /**
+     * 멤버 수락
+     *
+     * @param userId   유저 id
+     * @param workspaceId   워크스페이스 id
+     * @return MessageDto
+     */
     @Transactional
-    public MessageDto acceptMember(Long userId) {
-        User user = userRepository.findByIdOrElseThrow(userId);
-        Member member = memberRepository.findByIdOrElseThrow(user.getId());
+    public MessageDto acceptMember(Long userId, Long workspaceId) {
+        Member member = memberRepository.findByUserIdAndWorkspaceId(userId, workspaceId)
+                .orElseThrow(() -> new BusinessException(ExceptionType.NOT_FIND_MEMBER));
 
         member.setActive(true);
         memberRepository.save(member);
 
         String message = "수락 완료되었습니다.";
-
         return new MessageDto(message);
     }
 
-    //멤버 권한수정
+    /**
+     * 멤버 권한 수정
+     *
+     * @param memberRole   멤버 권한
+     * @param memberId   멤버 id
+     * @param role   수정 후 멤버 권한
+     * @return UpdateMemberRoleResponseDto
+     */
     @Transactional
-    public UpdateMemberRoleResponseDto updateMemberRole(Long userId, Long workspaceId, Long memberId, String role) {
-        User user = userRepository.findByIdOrElseThrow(userId);
-        Member member = memberRepository.findByIdOrElseThrow(memberId);
-        Workspace workspace = workspaceRepository.findByIdOrElseThrow(workspaceId);
-
-        if(!workspace.getUser().getId().equals(user.getId())) {
+    public UpdateMemberRoleResponseDto updateMemberRole(MemberRole memberRole, Long memberId, String role) {
+        if(memberRole != MemberRole.ADMIN) {
             throw new BusinessException(ExceptionType.NOT_ADMIN);
         }
 
+        Member member = memberRepository.findByIdOrElseThrow(memberId);
         member.setRole(MemberRole.valueOf(role));
 
         return new UpdateMemberRoleResponseDto(member.getId(), member.getRole().toString());
     }
 
-    //멤버 조회
+    /**
+     * 멤버 조회
+     *
+     * @param workspaceId   워크스페이스 id
+     * @return List<MemberResponseDto>
+     */
     public List<MemberResponseDto> getMembers(Long workspaceId) {
         List<Member> members = memberRepository.findAllByWorkspaceId(workspaceId);
 
@@ -83,6 +101,20 @@ public class MemberService {
                         member.getId(),
                         member.getRole().toString()))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 해당 워크스페이스의 멤버인지 확인 후 멤버권한 반환
+     *
+     * @param userId   유저 id
+     * @param workspaceId   워크스페이스 id
+     * @return MemberRole
+     */
+    public MemberRole accessMember(Long userId, Long workspaceId) {
+        Member member = memberRepository.findByUserIdAndWorkspaceId(userId, workspaceId)
+                .orElseThrow(() -> new BusinessException(ExceptionType.NOT_FIND_MEMBER));
+
+        return member.getRole();
     }
 
     //멤버 권한 확인(카드관련)

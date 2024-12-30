@@ -1,13 +1,12 @@
 package com.example.trelloproject.workspace;
 
-import com.example.trelloproject.global.constant.Const;
 import com.example.trelloproject.global.dto.MessageDto;
-import com.example.trelloproject.user.User;
+import com.example.trelloproject.global.jwt.JwtUtil;
+import com.example.trelloproject.member.MemberRole;
+import com.example.trelloproject.member.MemberService;
 import com.example.trelloproject.workspace.dto.SearchWorkspaceResponseDto;
 import com.example.trelloproject.workspace.dto.WorkspaceRequestDto;
 import com.example.trelloproject.workspace.dto.WorkspaceResponseDto;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,36 +28,45 @@ import java.util.List;
 public class WorkspaceController {
 
     private final WorkspaceService workspaceService;
+    private final MemberService memberService;
+    private final JwtUtil jwtUtil;
 
-    @PostMapping
-    public ResponseEntity<WorkspaceResponseDto> createWorkspace(@RequestBody WorkspaceRequestDto dto, HttpServletRequest request) {
+    @PostMapping("/create")
+    public ResponseEntity<WorkspaceResponseDto> createWorkspace(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody WorkspaceRequestDto dto) {
 
-        HttpSession session = request.getSession(false);
-        User user = (User) session.getAttribute(Const.LOGIN_USER);
+        String token = authorizationHeader.replace("Bearer ", "");
+        Long userId = jwtUtil.extractUserId(token);
 
-        WorkspaceResponseDto workspaceResponseDto = workspaceService.createWorkspace(user.getId(), dto.getTitle(), dto.getDescription());
+        WorkspaceResponseDto workspaceResponseDto = workspaceService.createWorkspace(userId, dto.getTitle(), dto.getDescription());
 
         return new ResponseEntity<>(workspaceResponseDto, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<WorkspaceResponseDto>> getWorkspaces(HttpServletRequest request) {
+    public ResponseEntity<List<WorkspaceResponseDto>> getWorkspaces(
+            @RequestHeader("Authorization") String authorizationHeader) {
 
-        HttpSession session = request.getSession(false);
-        User user = (User) session.getAttribute(Const.LOGIN_USER);
+        String token = authorizationHeader.replace("Bearer ", "");
+        Long userId = jwtUtil.extractUserId(token);
 
-        List<WorkspaceResponseDto> workspaceResponseDtos = workspaceService.getWorkspaces(user.getId());
+        List<WorkspaceResponseDto> workspaceResponseDtos = workspaceService.getWorkspaces(userId);
 
         return new ResponseEntity<>(workspaceResponseDtos, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SearchWorkspaceResponseDto> getWorkspace(@PathVariable("id") Long workspaceId, HttpServletRequest request) {
+    public ResponseEntity<SearchWorkspaceResponseDto> getWorkspace(
+            @PathVariable("id") Long workspaceId,
+            @RequestHeader("Authorization") String authorizationHeader) {
 
-        HttpSession session = request.getSession(false);
-        User user = (User) session.getAttribute(Const.LOGIN_USER);
+        String token = authorizationHeader.replace("Bearer ", "");
+        Long userId = jwtUtil.extractUserId(token);
 
-        SearchWorkspaceResponseDto workspaceResponseDto = workspaceService.getWorkspace(user.getId(), workspaceId);
+        memberService.accessMember(userId, workspaceId);
+
+        SearchWorkspaceResponseDto workspaceResponseDto = workspaceService.getWorkspace(workspaceId);
 
         return new ResponseEntity<>(workspaceResponseDto, HttpStatus.OK);
     }
@@ -65,24 +74,30 @@ public class WorkspaceController {
     @PatchMapping("/{id}")
     public ResponseEntity<WorkspaceResponseDto> updateWorkspace(
             @PathVariable("id") Long workspaceId,
-            @RequestBody WorkspaceRequestDto dto,
-            HttpServletRequest request) {
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody WorkspaceRequestDto dto) {
 
-        HttpSession session = request.getSession(false);
-        User user = (User) session.getAttribute(Const.LOGIN_USER);
+        String token = authorizationHeader.replace("Bearer ", "");
+        Long userId = jwtUtil.extractUserId(token);
 
-        WorkspaceResponseDto workspaceResponseDto = workspaceService.updateWorkspace(user.getId(), workspaceId, dto.getTitle(), dto.getDescription());
+        MemberRole memberRole = memberService.accessMember(userId, workspaceId);
+
+        WorkspaceResponseDto workspaceResponseDto = workspaceService.updateWorkspace(memberRole, workspaceId, dto.getTitle(), dto.getDescription());
 
         return new ResponseEntity<>(workspaceResponseDto, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<MessageDto> deleteWorkspace(@PathVariable("id") Long workspaceId, HttpServletRequest request) {
+    public ResponseEntity<MessageDto> deleteWorkspace(
+            @PathVariable("id") Long workspaceId,
+            @RequestHeader("Authorization") String authorizationHeader) {
 
-        HttpSession session = request.getSession(false);
-        User user = (User) session.getAttribute(Const.LOGIN_USER);
+        String token = authorizationHeader.replace("Bearer ", "");
+        Long userId = jwtUtil.extractUserId(token);
 
-        MessageDto messageDto = workspaceService.deleteWorkspace(user.getId(), workspaceId);
+        MemberRole memberRole = memberService.accessMember(userId, workspaceId);
+
+        MessageDto messageDto = workspaceService.deleteWorkspace(memberRole, workspaceId);
 
         return new ResponseEntity<>(messageDto, HttpStatus.OK);
     }

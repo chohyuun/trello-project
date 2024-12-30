@@ -13,8 +13,8 @@ public interface ListRepository extends JpaRepository<ListEntity, Long> {
         return findById(listId).orElseThrow(() -> new BusinessException(ExceptionType.NOT_FIND_LIST));
     }
 
-    //현재 순서의 끝번호를 가져오는 Query(null일시 1 반환)
-    @Query("SELECT COALESCE(MAX(l.index), 1) FROM ListEntity l")
+    //현재 순서의 끝번호를 가져오는 Query(null일시 0 반환)
+    @Query("SELECT COALESCE(MAX(l.index), 0) FROM ListEntity l")
     int findMaxIndex();
 
     //순서변경 Query

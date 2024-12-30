@@ -1,6 +1,5 @@
 package com.example.trelloproject.global.jwt;
 
-import com.example.trelloproject.global.filter.JwtFilter;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import javax.crypto.SecretKey;
@@ -28,9 +27,9 @@ public class JwtUtil {
 	 * @param email 사용자 이메일
 	 * @return 생성된 JWT 토큰
 	 */
-	public String generateToken(String email) {
+	public String generateToken(String email, Long userId) {
 		return Jwts.builder()
-			.setSubject(email)               // 토큰의 subject에 이메일 설정
+			.setSubject(email).claim("userId", userId)               // 토큰의 subject에 이메일, 아이디 설정
 			.setIssuedAt(new Date())         // 토큰 발급 시간 설정
 			.setExpiration(new Date(System.currentTimeMillis() + expirationTime)) // 토큰 만료 시간 설정
 			.signWith(secretKey, SignatureAlgorithm.HS256) // 비밀키로 서명
@@ -49,6 +48,16 @@ public class JwtUtil {
 			.parseClaimsJws(token)  // JWT 파싱
 			.getBody()
 			.getSubject();           // subject에서 이메일 반환
+	}
+
+	/**
+	 * JWT 토큰에서 아이디 추출
+	 * @param token JWT 토큰
+	 * @return 아이디
+	 */
+	public Long extractUserId(String token) {
+		Claims claims = getClaims(token);
+		return claims.get("userId", Long.class);
 	}
 
 	/**
