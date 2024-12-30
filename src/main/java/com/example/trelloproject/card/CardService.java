@@ -1,9 +1,6 @@
 package com.example.trelloproject.card;
 
-import com.example.trelloproject.card.dto.CardRequestDto;
-import com.example.trelloproject.card.dto.CardResponseDto;
-import com.example.trelloproject.card.dto.CardSearchRequestDto;
-import com.example.trelloproject.card.dto.GetCardResponseDto;
+import com.example.trelloproject.card.dto.*;
 import com.example.trelloproject.card.enums.ActionType;
 import com.example.trelloproject.global.exception.BusinessException;
 import com.example.trelloproject.global.exception.ExceptionType;
@@ -15,6 +12,7 @@ import com.example.trelloproject.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
@@ -40,8 +38,6 @@ public class CardService {
     private CardHistoryRepository cardHistoryRepository;
     @Autowired
     private  MemberService memberService;
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     public CardService(MemberService memberService, CardRepository cardRepository) {
@@ -120,54 +116,6 @@ public class CardService {
         return cardPage.map(GetCardResponseDto::new);
     }
 
-    @Transactional(readOnly = true)
-    public Page<CardResponseDto> searchCards(CardSearchRequestDto searchDto, Pageable pageable) {
-        Page<Card> cards;
-
-        // 마감일 범위 검색
-        if (searchDto.getStartDate() != null && searchDto.getEndDate() != null) {
-            cards = cardRepository.findByDueDateBetween(
-                    searchDto.getStartDate(),
-                    searchDto.getEndDate(),
-                    pageable
-            );
-        }
-        // 보드 ID로 검색
-        else if (searchDto.getBoardId() != null) {
-            if (searchDto.getKeyword() != null && !searchDto.getKeyword().isEmpty()) {
-                cards = cardRepository.findByList_Board_IdAndTitleContainingOrDescriptionContaining(
-                        searchDto.getBoardId(),
-                        searchDto.getKeyword(),
-                        searchDto.getKeyword(),
-                        pageable
-                );
-            } else {
-                cards = cardRepository.findByList_Board_Id(searchDto.getBoardId(), pageable);
-            }
-        }
-        // 리스트 ID로 검색
-        else if (searchDto.getListId() != null) {
-            cards = cardRepository.findByListIdAndTitleContainingOrDescriptionContainingOrMember_User_UserNameContaining(
-                    searchDto.getListId(),
-                    searchDto.getKeyword(),
-                    searchDto.getKeyword(),
-                    searchDto.getKeyword(),
-                    pageable
-            );
-        }
-        // 전체 검색
-        else {
-            cards = cardRepository.findByTitleContainingOrDescriptionContainingOrMember_User_UserNameContaining(
-                    searchDto.getKeyword(),
-                    searchDto.getKeyword(),
-                    searchDto.getKeyword(),
-                    pageable
-            );
-        }
-
-        return cards.map(CardResponseDto::new);
-    }
-
 
     @Transactional
     public GetCardResponseDto updateCard(Long cardId,Long listId, MultipartFile file ,CardRequestDto requestDto, Long userId, Long workspaceId) throws AccessDeniedException {
@@ -228,4 +176,40 @@ public class CardService {
 
         return true;
     }
+
+    @Transactional(readOnly = true)
+    public Page<CardResponseDto> searchCards(CardSearchRequestDto searchDto, Pageable pageable) {
+        Specification<Card> spec = Specification.where(null);
+
+        if (searchDto.getKeyword() != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.or(
+                            cb.like(root.get("title"), "%" + searchDto.getKeyword() + "%"),
+                            cb.like(root.get("description"), "%" + searchDto.getKeyword() + "%")
+                    )
+            );
+        }
+
+        if (searchDto.getBoardId() != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("list").get("board").get("id"), searchDto.getBoardId())
+            );
+        }
+
+        if (searchDto.getListId() != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("list").get("id"), searchDto.getListId())
+            );
+        }
+
+        if (searchDto.getStartDate() != null && searchDto.getEndDate() != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.between(root.get("dueDate"), searchDto.getStartDate(), searchDto.getEndDate())
+            );
+        }
+
+        Page<Card> cards = cardRepository.findAll(spec, pageable);
+        return cards.map(CardResponseDto::new);
+    }
+
 }

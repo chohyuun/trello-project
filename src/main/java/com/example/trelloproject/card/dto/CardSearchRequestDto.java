@@ -14,11 +14,15 @@ public class CardSearchRequestDto {
     private Date startDate;
     private Date endDate;
 
+
     public CardSearchRequestDto(String keyword, Long listId, Date startDate, Date endDate ,Long boardId) {
         this.keyword = keyword;
-        this.listId = listId;
         this.startDate = startDate;
         this.endDate = endDate;
         this.boardId = boardId;
+    }
+
+    public boolean hasKeyword() {
+        return keyword != null && !keyword.trim().isEmpty();
     }
 }

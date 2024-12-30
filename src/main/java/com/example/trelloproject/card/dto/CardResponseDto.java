@@ -17,22 +17,18 @@ public class CardResponseDto {
     private Long id;
     private String title;
     private String description;
-
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date dueDate;
+    private Long memberId;
+    private Long listId;
 
-    private Member member;
-    private ListEntity list;
-    private CardFile cardFile;
-
-
-    public CardResponseDto(Card card){
+    public CardResponseDto(Card card) {
         this.id = card.getId();
         this.title = card.getTitle();
         this.description = card.getDescription();
         this.dueDate = card.getDueDate();
-        this.member = card.getMember();
-        this.list = card.getList();
-        this.cardFile = card.getCardFile();
+        this.memberId = card.getMember() != null ? card.getMember().getId() : null;
+        this.listId = card.getList() != null ? card.getList().getId() : null;
     }
+
+
 }

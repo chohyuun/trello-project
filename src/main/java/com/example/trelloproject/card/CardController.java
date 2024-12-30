@@ -1,9 +1,6 @@
 package com.example.trelloproject.card;
 
-import com.example.trelloproject.card.dto.CardRequestDto;
-import com.example.trelloproject.card.dto.CardResponseDto;
-import com.example.trelloproject.card.dto.CardSearchRequestDto;
-import com.example.trelloproject.card.dto.GetCardResponseDto;
+import com.example.trelloproject.card.dto.*;
 import com.example.trelloproject.list.ListEntity;
 import com.example.trelloproject.list.ListRepository;
 import com.example.trelloproject.user.User;
@@ -173,6 +170,7 @@ public class CardController {
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(cardService.searchCards(searchDto, pageable));
     }
+
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException e) {
