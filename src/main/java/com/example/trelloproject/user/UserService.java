@@ -62,8 +62,10 @@ public class UserService {
 			new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword())
 		);
 
+		User user = userRepository.findByEmailOrElseThrow(loginRequestDto.getEmail());
+
 		// 인증 성공 시 JWT 토큰 생성
-		String token = jwtUtil.generateToken(loginRequestDto.getEmail());
+		String token = jwtUtil.generateToken(loginRequestDto.getEmail(),user.getId(),user.getRole().toString());
 
 		// JwtResponseDto에 JWT 토큰을 담아서 반환
 		return new JwtResponseDto(token);

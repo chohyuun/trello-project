@@ -1,7 +1,9 @@
 package com.example.trelloproject.user;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,7 +24,7 @@ public class UserDetailService implements UserDetailsService {
 		return new org.springframework.security.core.userdetails.User(
 			user.getEmail(),
 			user.getPassword(),
-			new ArrayList<>() // 권한 설정
+			Collections.singletonList(new SimpleGrantedAuthority("ROLE_"+user.getRole().toString())) // 권한 설정
 		);
 	}
 }

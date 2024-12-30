@@ -27,9 +27,11 @@ public class JwtUtil {
 	 * @param email 사용자 이메일
 	 * @return 생성된 JWT 토큰
 	 */
-	public String generateToken(String email, Long userId) {
+	public String generateToken(String email, Long userId, String userRole) {
 		return Jwts.builder()
-			.setSubject(email).claim("userId", userId)               // 토큰의 subject에 이메일, 아이디 설정
+			.setSubject(email)
+			.claim("userId", userId)               // 토큰의 subject에 이메일, 아이디 설정
+			.claim("role", userRole)
 			.setIssuedAt(new Date())         // 토큰 발급 시간 설정
 			.setExpiration(new Date(System.currentTimeMillis() + expirationTime)) // 토큰 만료 시간 설정
 			.signWith(secretKey, SignatureAlgorithm.HS256) // 비밀키로 서명
