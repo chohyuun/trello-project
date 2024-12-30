@@ -9,6 +9,8 @@ import com.example.trelloproject.global.exception.BusinessException;
 import com.example.trelloproject.global.exception.ExceptionType;
 import com.example.trelloproject.member.Member;
 import com.example.trelloproject.member.MemberRepository;
+import com.example.trelloproject.notice.NoticeChannel;
+import com.example.trelloproject.notice.NoticeService;
 import com.example.trelloproject.user.User;
 import com.example.trelloproject.user.UserRepository;
 import com.example.trelloproject.workspace.Workspace;
@@ -27,12 +29,11 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
     private final CardRepository cardRepository;
-    //    private final NoticeService noticeService;
+    private final NoticeService noticeService;
     private final UserRepository userRepository;
 
     @Transactional
     public CommentResponseDto createComment(Long workspaceId, String comments, String memberEmail, Long cardId) {
-        Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new BusinessException(ExceptionType.NOT_FIND_WORKSPACE));
         Member member = memberRepository.findByUserEmailAndWorkspaceId(memberEmail, workspaceId)
                 .orElseThrow(() -> new BusinessException(ExceptionType.NOT_FIND_MEMBER));
 
@@ -45,7 +46,7 @@ public class CommentService {
         Comment comment = new Comment(comments, member, card);
 
         commentRepository.save(comment);
-//        noticeService.sendSlackBotUserMessage(comments, workspace.getSlackCode(), NoticeChannel.COMMENT, member.getUser().getEmail(), cardOwner.getUser().getEmail());
+        noticeService.sendSlackBotUserMessage(comments, workspaceId, NoticeChannel.COMMENT, member.getUser().getEmail(), cardOwner.getUser().getEmail());
 
         return new CommentResponseDto(comment);
     }
@@ -62,7 +63,7 @@ public class CommentService {
         comment.isCardToComment(cardId);
 
         comment.update(comments);
-//        noticeService.sendSlackBotUserMessage(comments, workspace.getSlackCode(), NoticeChannel.COMMENT_CHANGE, memberEmail, user.getEmail());
+        noticeService.sendSlackBotUserMessage(comments, workspaceId, NoticeChannel.COMMENT_CHANGE, memberEmail, user.getEmail());
 
         return new CommentResponseDto(comment);
     }

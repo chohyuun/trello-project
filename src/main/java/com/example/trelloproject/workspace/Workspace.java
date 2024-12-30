@@ -25,6 +25,8 @@ public class Workspace extends BaseEntity {
 
     private String description;
 
+    @Column(nullable = false)
+    private String slackCode;
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -38,10 +40,11 @@ public class Workspace extends BaseEntity {
 
     public Workspace() {}
 
-    public Workspace(User user, String title, String description) {
+    public Workspace(User user, String title, String description, String slackCode) {
         this.user = user;
         this.title = title;
         this.description = description;
+        this.slackCode = slackCode;
     }
 
     public void updateWorkspace(String title, String description) {

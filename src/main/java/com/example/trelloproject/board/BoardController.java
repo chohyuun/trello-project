@@ -75,7 +75,7 @@ public class BoardController {
 
         MemberRole memberRole = memberService.accessMember(userId, workspaceId);
 
-        BoardResponseDto boardResponseDto = boardService.updateBoard(memberRole, boardId, title, file);
+        BoardResponseDto boardResponseDto = boardService.updateBoard(memberRole, boardId, title, file, workspaceId);
 
         return new ResponseEntity<>(boardResponseDto, HttpStatus.OK);
 

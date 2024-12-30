@@ -5,6 +5,7 @@ import com.example.trelloproject.global.jwt.JwtUtil;
 import com.example.trelloproject.member.MemberRole;
 import com.example.trelloproject.member.MemberService;
 import com.example.trelloproject.workspace.dto.SearchWorkspaceResponseDto;
+import com.example.trelloproject.workspace.dto.WorkspaceCreateRequestDto;
 import com.example.trelloproject.workspace.dto.WorkspaceRequestDto;
 import com.example.trelloproject.workspace.dto.WorkspaceResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -36,12 +37,12 @@ public class WorkspaceController {
     @PostMapping("/create")
     public ResponseEntity<WorkspaceResponseDto> createWorkspace(
             @RequestHeader("Authorization") String authorizationHeader,
-            @RequestBody WorkspaceRequestDto dto) {
+            @RequestBody WorkspaceCreateRequestDto dto) {
 
         String token = authorizationHeader.replace("Bearer ", "");
         Long userId = jwtUtil.extractUserId(token);
 
-        WorkspaceResponseDto workspaceResponseDto = workspaceService.createWorkspace(userId, dto.getTitle(), dto.getDescription());
+        WorkspaceResponseDto workspaceResponseDto = workspaceService.createWorkspace(userId, dto.getTitle(), dto.getDescription(), dto.getSlackCode());
 
         return new ResponseEntity<>(workspaceResponseDto, HttpStatus.CREATED);
     }
@@ -81,10 +82,11 @@ public class WorkspaceController {
 
         String token = authorizationHeader.replace("Bearer ", "");
         Long userId = jwtUtil.extractUserId(token);
+        String userEmail = jwtUtil.extractEmail(token);
 
         MemberRole memberRole = memberService.accessMember(userId, workspaceId);
 
-        WorkspaceResponseDto workspaceResponseDto = workspaceService.updateWorkspace(memberRole, workspaceId, dto.getTitle(), dto.getDescription());
+        WorkspaceResponseDto workspaceResponseDto = workspaceService.updateWorkspace(memberRole, workspaceId, dto.getTitle(), dto.getDescription(), userEmail);
 
         return new ResponseEntity<>(workspaceResponseDto, HttpStatus.OK);
     }
