@@ -140,7 +140,8 @@
 
 ## 🔧구현 기능
 <details>
-<summary>구현 기능 펼치</summary>
+<summary>구현 기능 펼치기</summary>
+
 ### 🧑‍🧑‍🧒 user
 
 - 회원가입 & 회원 탈퇴
@@ -178,7 +179,7 @@
 ### ⏰ 알림
 
 - 특정 동작 수행시 슬랙으로 알림 발송
-- </details>
+</details>
 
 
 <br />
