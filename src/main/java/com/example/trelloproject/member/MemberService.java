@@ -5,6 +5,7 @@ import com.example.trelloproject.global.exception.BusinessException;
 import com.example.trelloproject.global.exception.ExceptionType;
 import com.example.trelloproject.member.dto.MemberResponseDto;
 import com.example.trelloproject.member.dto.UpdateMemberRoleResponseDto;
+import com.example.trelloproject.notice.NoticeService;
 import com.example.trelloproject.user.User;
 import com.example.trelloproject.user.UserRepository;
 import com.example.trelloproject.workspace.Workspace;
@@ -23,6 +24,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final WorkspaceRepository workspaceRepository;
     private final UserRepository userRepository;
+    private final NoticeService noticeService;
 
     /**
      * 멤버 초대
@@ -62,6 +64,7 @@ public class MemberService {
 
         member.setActive(true);
         memberRepository.save(member);
+        noticeService.inviteUser(workspaceId, member.getUser().getEmail());
 
         String message = "수락 완료되었습니다.";
         return new MessageDto(message);

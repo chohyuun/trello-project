@@ -1,6 +1,9 @@
 package com.example.trelloproject.card;
 
-import com.example.trelloproject.card.dto.*;
+import com.example.trelloproject.card.dto.CardRequestDto;
+import com.example.trelloproject.card.dto.CardResponseDto;
+import com.example.trelloproject.card.dto.CardSearchRequestDto;
+import com.example.trelloproject.card.dto.GetCardResponseDto;
 import com.example.trelloproject.card.enums.ActionType;
 import com.example.trelloproject.global.exception.BusinessException;
 import com.example.trelloproject.global.exception.ExceptionType;
@@ -8,17 +11,17 @@ import com.example.trelloproject.member.Member;
 import com.example.trelloproject.member.MemberRepository;
 import com.example.trelloproject.member.MemberRole;
 import com.example.trelloproject.member.MemberService;
-import com.example.trelloproject.user.UserRepository;
+import com.example.trelloproject.notice.NoticeChannel;
+import com.example.trelloproject.notice.NoticeService;
 import jakarta.persistence.EntityNotFoundException;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -28,6 +31,7 @@ import java.nio.file.AccessDeniedException;
 @Service
 public class CardService {
 
+    private final NoticeService noticeService;
     @Autowired
     private CardRepository cardRepository;
     @Autowired
@@ -37,18 +41,18 @@ public class CardService {
     @Autowired
     private CardHistoryRepository cardHistoryRepository;
     @Autowired
-    private  MemberService memberService;
+    private MemberService memberService;
 
     @Autowired
-    public CardService(MemberService memberService, CardRepository cardRepository) {
+    public CardService(MemberService memberService, CardRepository cardRepository, NoticeService noticeService) {
         this.memberService = memberService;
         this.cardRepository = cardRepository;
+        this.noticeService = noticeService;
     }
 
 
     @Transactional
-    public CardResponseDto createCard(CardRequestDto requestDto, MultipartFile file, long userId, Long workspaceId,Long listId) throws AccessDeniedException {
-
+    public CardResponseDto createCard(CardRequestDto requestDto, MultipartFile file, long userId, Long workspaceId, Long listId, String userEmail) throws AccessDeniedException {
         if (!memberService.hasCardEditPermission(userId, workspaceId)) {
             throw new BusinessException(ExceptionType.UNAUTHORIZED);
         }
@@ -74,6 +78,8 @@ public class CardService {
                 throw new RuntimeException("파일 저장 중 오류가 발생했습니다.", e);
             }
         }
+
+        noticeService.sendSlackBotMessage(requestDto.getTitle(), workspaceId, NoticeChannel.CARD, userEmail);
 
         return new CardResponseDto(saveCard);
     }
@@ -118,7 +124,7 @@ public class CardService {
 
 
     @Transactional
-    public GetCardResponseDto updateCard(Long cardId,Long listId, MultipartFile file ,CardRequestDto requestDto, Long userId, Long workspaceId) throws AccessDeniedException {
+    public GetCardResponseDto updateCard(Long cardId, Long listId, MultipartFile file, CardRequestDto requestDto, Long userId, Long workspaceId, String userEmail) throws AccessDeniedException {
 
         if (!memberService.hasCardEditPermission(userId, workspaceId)) {
             throw new BusinessException(ExceptionType.UNAUTHORIZED);
@@ -158,6 +164,8 @@ public class CardService {
                 ActionType.UPDATE
         );
         cardHistoryRepository.save(history);
+
+        noticeService.sendSlackBotMessage("카드 내용 변경!", workspaceId, NoticeChannel.CARD_CHANGE, userEmail);
 
         return new GetCardResponseDto(card);
     }

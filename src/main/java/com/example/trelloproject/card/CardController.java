@@ -1,12 +1,16 @@
 package com.example.trelloproject.card;
 
-import com.example.trelloproject.card.dto.*;
+import com.example.trelloproject.card.dto.CardRequestDto;
+import com.example.trelloproject.card.dto.CardResponseDto;
+import com.example.trelloproject.card.dto.CardSearchRequestDto;
+import com.example.trelloproject.card.dto.GetCardResponseDto;
 import com.example.trelloproject.list.ListEntity;
 import com.example.trelloproject.list.ListRepository;
 import com.example.trelloproject.user.User;
 import com.example.trelloproject.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -18,8 +22,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
-
-import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.AccessDeniedException;
@@ -59,8 +61,7 @@ public class CardController {
         Long workspaceId = list.getBoard().getWorkspace().getId();
 
 
-
-        CardResponseDto response = cardService.createCard(requestDto, file, user.getId(), listId, workspaceId);
+        CardResponseDto response = cardService.createCard(requestDto, file, user.getId(), listId, workspaceId, user.getEmail());
         return ResponseEntity.ok(response);
     }
 
@@ -130,7 +131,7 @@ public class CardController {
                 .orElseThrow(() -> new EntityNotFoundException("List not found"));
         Long workspaceId = list.getBoard().getWorkspace().getId();
 
-        GetCardResponseDto response = cardService.updateCard(cardId, listId,file, requestDto, user.getId(),workspaceId);
+        GetCardResponseDto response = cardService.updateCard(cardId, listId, file, requestDto, user.getId(), workspaceId, user.getEmail());
         return ResponseEntity.ok(response);
     }
 

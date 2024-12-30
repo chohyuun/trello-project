@@ -8,6 +8,8 @@ import com.example.trelloproject.global.dto.MessageDto;
 import com.example.trelloproject.global.exception.BusinessException;
 import com.example.trelloproject.global.exception.ExceptionType;
 import com.example.trelloproject.member.MemberRole;
+import com.example.trelloproject.notice.NoticeChannel;
+import com.example.trelloproject.notice.NoticeService;
 import com.example.trelloproject.workspace.Workspace;
 import com.example.trelloproject.workspace.WorkspaceRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class BoardService {
     private final String bucketName = "mytrellobucket2";
     private final BoardRepository boardRepository;
     private final WorkspaceRepository workspaceRepository;
+    private final NoticeService noticeService;
 
     /**
      * 보드 생성
@@ -50,6 +53,7 @@ public class BoardService {
         board.setImagePath(fileUrl);
 
         Board savedBoard = boardRepository.save(board);
+        noticeService.sendSlackBotMessage(board.getTitle(), workspaceId, NoticeChannel.BOARD, null);
 
         return new BoardResponseDto(savedBoard.getId(), savedBoard.getWorkspace().getId(), savedBoard.getTitle(), savedBoard.getImagePath());
     }
@@ -70,21 +74,23 @@ public class BoardService {
     /**
      * 보드 수정
      *
-     * @param memberRole   멤버 권한
-     * @param boardId   보드 id
-     * @param title   보드 제목
-     * @param file   이미지 파일
+     * @param memberRole  멤버 권한
+     * @param boardId     보드 id
+     * @param title       보드 제목
+     * @param file        이미지 파일
+     * @param workspaceId 워크스페이스
      * @return BoardResponseDto
      */
     @Transactional
-    public BoardResponseDto updateBoard(MemberRole memberRole, Long boardId, String title, MultipartFile file) {
-        if(memberRole.equals(MemberRole.READONLY)) {
+    public BoardResponseDto updateBoard(MemberRole memberRole, Long boardId, String title, MultipartFile file, Long workspaceId) {
+        if (memberRole.equals(MemberRole.READONLY)) {
             throw new BusinessException(ExceptionType.UNAUTHORIZED);
         }
 
         Board board = boardRepository.findByIdOrElseThrow(boardId);
         String fileUrl = uploadFileToS3(file);
         board.updateBoard(title, fileUrl);
+        noticeService.sendSlackBotMessage(board.getTitle(), workspaceId, NoticeChannel.BOARD_CHANGE, null);
 
         return new BoardResponseDto(board.getId(), board.getWorkspace().getId(), board.getTitle(), board.getImagePath());
     }
