@@ -9,7 +9,12 @@ import lombok.*;
 
 import java.util.Date;
 
-@Table(name = "card")
+@Table(name = "card",indexes = {
+        @Index(name = "idx_card_search",
+                columnList = "list_id, board_id, due_date, id"),
+        @Index(name = "idx_card_member",
+                columnList = "member_id")
+})
 @Entity
 @Getter
 @NoArgsConstructor
@@ -27,10 +32,10 @@ public class Card extends BaseEntity {
     @JoinColumn(name = "list_id")
     private ListEntity list;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title", nullable = false,columnDefinition = "TEXT")
     private String title;
 
-    @Column(name = "description")
+    @Column(name = "description",columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "due_date")

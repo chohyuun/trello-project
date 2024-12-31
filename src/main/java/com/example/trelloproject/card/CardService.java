@@ -179,37 +179,13 @@ public class CardService {
 
     @Transactional(readOnly = true)
     public Page<CardResponseDto> searchCards(CardSearchRequestDto searchDto, Pageable pageable) {
-        Specification<Card> spec = Specification.where(null);
-
-        if (searchDto.getKeyword() != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.or(
-                            cb.like(root.get("title"), "%" + searchDto.getKeyword() + "%"),
-                            cb.like(root.get("description"), "%" + searchDto.getKeyword() + "%")
-                    )
-            );
-        }
-
-        if (searchDto.getBoardId() != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.equal(root.get("list").get("board").get("id"), searchDto.getBoardId())
-            );
-        }
-
-        if (searchDto.getListId() != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.equal(root.get("list").get("id"), searchDto.getListId())
-            );
-        }
-
-        if (searchDto.getStartDate() != null && searchDto.getEndDate() != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.between(root.get("dueDate"), searchDto.getStartDate(), searchDto.getEndDate())
-            );
-        }
-
-        Page<Card> cards = cardRepository.findAll(spec, pageable);
-        return cards.map(CardResponseDto::new);
+        return cardRepository.searchCards(
+                searchDto.getKeyword(),
+                searchDto.getBoardId(),
+                searchDto.getStartDate(),
+                searchDto.getEndDate(),
+                pageable
+        ).map(CardResponseDto::new);
     }
 
 }
